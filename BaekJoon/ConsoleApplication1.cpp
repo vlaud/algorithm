@@ -4,26 +4,23 @@
 
 using namespace std;
 
-// S(1 ≤ S ≤ 4,294,967,295)
-// 범위로 인해 long long 사용
-#define ll long long
-
 int main() {
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 
-	ll S;
-	ll N = 0;
-	ll idx = 0;
+	int N;
+	int result = -1;
+	cin >> N;
 
-	cin >> S;
-
-	while (N <= S) {
-		idx++;
-		N += idx;
+	for (int i = N / 5; i >= 0; i--) {
+		if ((N - i * 5) % 3 == 0) {
+			result = i + (N - i * 5) / 3;
+			break;
+		}
+		
 	}
 
-	cout << idx - 1;
+	cout << result;
 
 	return 0;
 }
