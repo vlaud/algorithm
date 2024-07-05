@@ -8,16 +8,26 @@ int main() {
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 
-	int N;
-	int result = -1;
-	cin >> N;
+	int N, K;
 
-	for (int i = N / 5; i >= 0; i--) {
-		if ((N - i * 5) % 3 == 0) {
-			result = i + (N - i * 5) / 3;
-			break;
+	cin >> N >> K;
+
+	vector<int> coins(N);
+
+	for (int i = 0; i < N; i++) {
+		cin >> coins[i];
+	}
+
+	int result = 0;
+
+	for (int i = N - 1; i >= 0; i--) {
+		if (K <= 0) break;
+
+		if (K >= coins[i]) {
+			result += K / coins[i];
+			K = K % coins[i];
+			
 		}
-		
 	}
 
 	cout << result;
