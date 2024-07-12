@@ -30,9 +30,10 @@ int* primeNumbers(int num) {
 			}
 			getNum[j] = -1;
 			amount--;
+			cout << "j = " << j <<", amount = " << amount << "\n";
 		}
 	}
-
+	
 	int idx = 2;
 	int* primeNum = new int[amount + 1];
 
@@ -59,8 +60,10 @@ int main() {
 
 	cin >> number;
 
-	for (int i = 1; i <= primeNumbers(number)[0]; i++) {
-		cout << primeNumbers(number)[i] << " ";
+	int* primeNum = primeNumbers(number);
+
+	for (int i = 0; i <= primeNum[0]; i++) {
+		cout << primeNum[i] << " ";
 	}
 
 	return 0;
