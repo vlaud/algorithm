@@ -1,60 +1,71 @@
 ﻿#include <iostream>
 #include <vector>
+#include <queue>
 #include <algorithm>
 #include <cmath>
-
+#define endl "\n"
 using namespace std;
 
-vector<int> primeNumbers(int num) {
+bool dVisited[1001];
+bool bVisited[1001];
+vector<vector<int>> graph(1001);
 
-	vector<int> getNum(num + 1);
-	vector<int> primeNum;
+void bfs(int source) {
+	queue<int> q;
+	q.push(source);
+	bVisited[source] = true;
+	int current = 0;
 
-	getNum[0] = -1;
-	getNum[1] = -1;
+	while (!q.empty()) {
+		current = q.front();
+		cout << current << " ";
+		q.pop();
 
-	for (int i = 2; i <= num; i++) {
-		getNum[i] = i;
-	}
-
-	for (int i = 2; i * i <= num; i++) {
-		// primeNum[i] 가 -1이면 이미 소수가 아니므로 continue
-		if (getNum[i] == -1) {
-			cout << "i = " << i << "번째 패스" << "\n";
-			continue;
-		}
-			
-		// i*k (k<i) 까지의 수는 이미 검사했으므로 j는 i*i 부터 검사해준다.
-		for (int j = i * i; j <= num; j += i) {
-			if (getNum[j] == -1) {
-				cout << "j = " << j << "번째 패스" << "\n";
-				continue;
+		for (int next : graph[current]) {
+			if (!bVisited[next]) {
+				q.push(next);
+				bVisited[next] = true;
 			}
-			cout << "i = " << i << ", j = " << j << "번째 계산중" << "\n";
-			getNum[j] = -1;
 		}
 	}
-	
-	for (int num : getNum) {
-		if (num != -1) primeNum.push_back(num);
-	}
-	
-	return primeNum;
 }
+void dfs(int current) {
+
+	dVisited[current] = true;
+	cout << current << " ";
+
+	for (int next : graph[current]) {
+		if (!dVisited[next]) {
+			dfs(next);
+		}
+	}
+}
+
 
 int main() {
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
+	cout.tie(NULL);
 
-	int number = 0;
+	int N, M, V;
 
-	cin >> number;
+	cin >> N >> M >> V;
 
-	auto primeNum = primeNumbers(number);
-
-	for (int i = 0; i < primeNum.size(); i++) {
-		cout << primeNum[i] << " ";
+	int a, b;
+	for (int i = 0; i <= M; i++) {
+		cin >> a >> b;
+		graph[a].push_back(b);
+		graph[b].push_back(a);
 	}
+
+	for (int i = 0; i <= N; i++) {
+		sort(graph[i].begin(), graph[i].end());
+	}
+
+	dfs(V);
+	cout << endl;
+	bfs(V);
+	cout << endl;
 
 	return 0;
 }
