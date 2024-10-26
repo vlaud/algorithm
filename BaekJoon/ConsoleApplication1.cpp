@@ -1,87 +1,94 @@
-﻿#define _USE_MATH_DEFINES
-
-#include <iostream>
-#include <vector>
+﻿#include <iostream>
 #include <algorithm>
-#include <sstream>
-#include <unordered_map>
+#include <vector>
+#include <queue>
 
 using namespace std;
 
-#define endl "\n"
+#define INF 0x3f3f3f3f
 
-double getRadian(double degree) {
-    return degree * M_PI / 180;
+typedef pair<int, int> iPair;
+
+class Graph {
+	int V;
+	vector<iPair>* adj;
+
+public:
+	Graph(int V);
+	void addEdge(int u, int v, int w);
+	void shortestPath(int s);
+};
+
+Graph::Graph(int V)
+{
+	this->V = V;
+	adj = new vector<iPair>[V];
 }
 
-double getDestination(vector<double> a, vector<double> b) {
-    double x = (b[0] - a[0]) * cos((a[1] + b[1]) * 0.5f);
-    double y = b[1] - a[1];
+void Graph::addEdge(int u, int v, int w)
+{
+	adj[u].push_back(make_pair(v, w));
+	adj[v].push_back(make_pair(u, w));
+}
 
-    double d = sqrt(pow(x, 2) + pow(y, 2)) * 6371;
+void Graph::shortestPath(int s)
+{
+	priority_queue<iPair, vector<iPair>, greater<iPair>> pq;
 
-    return d;
+	vector<int> dist(V, INF);
+
+	pq.push(make_pair(0, s));
+	dist[s] = 0;
+
+	while (!pq.empty()) {
+		int u = pq.top().second;
+		pq.pop();
+
+		for (auto n : adj[u]) {
+			int v = n.first;
+			int w = n.second;
+
+			if (dist[v] > dist[u] + w) {
+				dist[v] = dist[u] + w;
+				pq.push(make_pair(dist[v], v));
+			}
+		}
+	}
+
+	// Print the shortest distances
+	cout << "Vertex Distance from Source" << endl;
+	for (int i = 0; i < V; ++i)
+		cout << i << " \t\t " << dist[i] << endl;
 }
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(NULL);
-    cout.tie(NULL);
-    
-    /*string pullPath = "1;Maison de la Prevention Sante;6 rue Maguelone 340000 Montpellier;;3,87952263361082;43,6071285339217";
-    stringstream s_longitude;
-    stringstream s_latitude;
-    
-    long double longitude, latitude;
-    double rLong, rLati;
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.tie(NULL);
 
-    replace(pullPath.begin(), pullPath.end(), ',', '.');
+	int V = 9; // Number of vertices
+	Graph g(V);
 
-    int twoSemi = pullPath.rfind(";;") + 2;
-    int oneSemi = pullPath.rfind(";") + 1;
+	// Add edges to the graph
+	g.addEdge(0, 1, 4);
+	g.addEdge(0, 7, 8);
+	g.addEdge(1, 2, 8);
+	g.addEdge(1, 7, 11);
+	g.addEdge(2, 3, 7);
+	g.addEdge(2, 8, 2);
+	g.addEdge(2, 5, 4);
+	g.addEdge(3, 4, 9);
+	g.addEdge(3, 5, 14);
+	g.addEdge(4, 5, 10);
+	g.addEdge(5, 6, 2);
+	g.addEdge(6, 7, 1);
+	g.addEdge(6, 8, 6);
+	g.addEdge(7, 8, 7);
 
-    s_longitude.str(pullPath.substr(twoSemi, oneSemi - twoSemi - 1));
-    s_longitude >> longitude;
-    s_latitude.str(pullPath.substr(oneSemi));
-    s_latitude >> latitude;
-    rLong = getRadian(longitude);
-    rLati = getRadian(latitude);
+	// Call the shortestPath function
+	g.shortestPath(0);
 
-    cout.precision(30);
-    cout << pullPath.substr(twoSemi, oneSemi - twoSemi - 1) << endl;
-    cout << longitude << endl;
-    cout << rLong << endl;
-    
-    cout << pullPath.substr(oneSemi) << endl;
-    cout << latitude << endl;
-    cout << rLati << endl;*/
-
-    int nums[5] = { 7, 5, 6, 3, 1 };
-
-    for (int num : nums) {
-        cout << num << " ";
-    }
-    cout << endl;
-
-    int temp = 0;
-
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4 - i; j++) {
-            if (nums[j] > nums[j + 1]) {
-                temp = nums[j + 1];
-                nums[j + 1] = nums[j];
-                nums[j] = temp;
-            }
-        }
-        for (int num : nums) {
-            cout << num << " ";
-        }
-        cout << endl;
-    }
-
-    for (int num : nums) {
-        cout << num << " ";
-    }
-    cout << endl;
-    return 0;
+	return 0;
 }
+
+
