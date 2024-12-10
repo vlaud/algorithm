@@ -1,64 +1,40 @@
-﻿#include <iostream>
-#include <algorithm>
+﻿#define _USE_MATH_DEFINES
+
+#include <iostream>
 #include <vector>
-#include <queue>
+#include <algorithm>
+#include <sstream>
+#include <unordered_map>
+#include <string>
 
 using namespace std;
 
-#define INF 0x3f3f3f3f
+#define endl "\n"
 
-typedef pair<int, int> iPair;
+int maximumLength(string s) {
+	int n = s.size();
+	int l = 1, r = n;
 
-class Graph {
-	int V;
-	vector<iPair>* adj;
+	auto getSpecial = [s, n](int size) {
+		int p = 0;
+		vector<int> letters(26, 0);
 
-public:
-	Graph(int V);
-	void addEdge(int u, int v, int w);
-	void shortestPath(int s);
-};
-
-Graph::Graph(int V)
-{
-	this->V = V;
-	adj = new vector<iPair>[V];
-}
-
-void Graph::addEdge(int u, int v, int w)
-{
-	adj[u].push_back(make_pair(v, w));
-	adj[v].push_back(make_pair(u, w));
-}
-
-void Graph::shortestPath(int s)
-{
-	priority_queue<iPair, vector<iPair>, greater<iPair>> pq;
-
-	vector<int> dist(V, INF);
-
-	pq.push(make_pair(0, s));
-	dist[s] = 0;
-
-	while (!pq.empty()) {
-		int u = pq.top().second;
-		pq.pop();
-
-		for (auto n : adj[u]) {
-			int v = n.first;
-			int w = n.second;
-
-			if (dist[v] > dist[u] + w) {
-				dist[v] = dist[u] + w;
-				pq.push(make_pair(dist[v], v));
-			}
+		for (int i = 0; i < n; i++) {
+			if (s[i] != s[p]) p = i;
+			if (i - p + 1 >= size) letters[s[i] - 'a']++;
+			if (letters[s[i] - 'a'] > 2) return true;
 		}
-	}
+		return false;
+		};
 
-	// Print the shortest distances
-	cout << "Vertex Distance from Source" << endl;
-	for (int i = 0; i < V; ++i)
-		cout << i << " \t\t " << dist[i] << endl;
+	if (!getSpecial(1)) return -1;
+
+	while (l + 1 < r) {
+		int mid = (l + r) / 2;
+		if (getSpecial(mid)) l = mid;
+		else r = mid;
+	}
+	return l;
 }
 
 int main() {
@@ -66,29 +42,8 @@ int main() {
 	cin.tie(NULL);
 	cout.tie(NULL);
 
-	int V = 9; // Number of vertices
-	Graph g(V);
 
-	// Add edges to the graph
-	g.addEdge(0, 1, 4);
-	g.addEdge(0, 7, 8);
-	g.addEdge(1, 2, 8);
-	g.addEdge(1, 7, 11);
-	g.addEdge(2, 3, 7);
-	g.addEdge(2, 8, 2);
-	g.addEdge(2, 5, 4);
-	g.addEdge(3, 4, 9);
-	g.addEdge(3, 5, 14);
-	g.addEdge(4, 5, 10);
-	g.addEdge(5, 6, 2);
-	g.addEdge(6, 7, 1);
-	g.addEdge(6, 8, 6);
-	g.addEdge(7, 8, 7);
-
-	// Call the shortestPath function
-	g.shortestPath(0);
-
+	string s = "aabccc";
+	cout << maximumLength(s) << endl;
 	return 0;
 }
-
-
