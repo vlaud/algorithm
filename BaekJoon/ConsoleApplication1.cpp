@@ -5,36 +5,63 @@
 #include <algorithm>
 #include <sstream>
 #include <unordered_map>
-#include <string>
 
 using namespace std;
 
-#define endl "\n"
+int partition(vector<int>& arr, int left, int right) {
+	int& pivot = arr[right];
 
-int maximumLength(string s) {
-	int n = s.size();
-	int l = 1, r = n;
-
-	auto getSpecial = [s, n](int size) {
-		int p = 0;
-		vector<int> letters(26, 0);
-
-		for (int i = 0; i < n; i++) {
-			if (s[i] != s[p]) p = i;
-			if (i - p + 1 >= size) letters[s[i] - 'a']++;
-			if (letters[s[i] - 'a'] > 2) return true;
+	int i = left;
+	for (int j = left; j < right; j++) {
+		if (arr[j] < pivot) {
+			swap(arr[i++], arr[j]);
 		}
-		return false;
-		};
-
-	if (!getSpecial(1)) return -1;
-
-	while (l + 1 < r) {
-		int mid = (l + r) / 2;
-		if (getSpecial(mid)) l = mid;
-		else r = mid;
 	}
-	return l;
+	swap(arr[i], pivot);
+	return i;
+}
+
+int partition2(vector<int>& arr, int left, int right) {
+	int i = left, j = right, pivot = right;
+
+	while (i < j) {
+		while (i < j && arr[i] <= arr[pivot]) i++;
+		while (i < j && arr[j] >= arr[pivot]) j--;
+
+		if (i < j) {
+			swap(arr[i], arr[j]);
+			continue;
+		}
+
+		swap(arr[j], arr[pivot]);
+	}
+	return i;
+}
+
+void quickSort2(vector<int>& arr, int left, int right) {
+	if (left >= right) return;
+
+	int pi = partition2(arr, left, right);
+
+	quickSort2(arr, left, pi - 1);
+	quickSort2(arr, pi + 1, right);
+}
+void quickSort(vector<int>& arr, int left, int right) {
+	int i = left, j = right, pivot = right;
+
+	while (i < j) {
+		while (i < j && arr[i] <= arr[pivot]) i++;
+		while (i < j && arr[j] >= arr[pivot]) j--;
+
+		if (i < j) {
+			swap(arr[i], arr[j]);
+			continue;
+		}
+
+		swap(arr[j], arr[pivot]);
+		quickSort(arr, left, i - 1);
+		quickSort(arr, i + 1, right);
+	}
 }
 
 int main() {
@@ -42,8 +69,17 @@ int main() {
 	cin.tie(NULL);
 	cout.tie(NULL);
 
+	vector<int> arr = { 1, 2, 8, 7, 4, 6, 3, 2, 4 };
+	quickSort(arr, 0, arr.size() - 1);
 
-	string s = "aabccc";
-	cout << maximumLength(s) << endl;
+	for (int it : arr) cout << it << " ";
+	cout << endl;
+
+	vector<int> arr2 = { 1, 2, 8, 7, 4, 6, 3, 2, 4 };
+	quickSort2(arr2, 0, arr2.size() - 1);
+
+	for (int it : arr2) cout << it << " ";
+
+	cout << endl;
 	return 0;
 }
