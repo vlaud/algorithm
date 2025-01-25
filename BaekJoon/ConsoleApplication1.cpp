@@ -7,44 +7,61 @@
 #include <unordered_map>
 
 using namespace std;
-
+using int2d = vector<vector<int>>;
 #define endl "\n"
 
-int partition(vector<int>& arr, int left, int right) {
-    int& pivot = arr[right];
-    right--;
-    while (1) {
-        while (arr[left] < pivot) left++;
-        while (arr[right] > pivot) right--;
+int partition(vector<int>& arr, int low, int high) {
+    int pivot = arr[low];
 
-        if (left >= right) break;
-        else {
-            swap(arr[left], arr[right]);
-            left++;
-        }
+    while (true) {
+
+        // Find leftmost element greater than or
+        // equal to pivot
+        while (arr[low] < pivot) low++;
+
+        // Find rightmost element smaller than 
+        // or equal to pivot
+        while (arr[high] > pivot) high--;
+
+        // If two pointers met.
+        if (low >= high) break;
+
+        swap(arr[low], arr[high]);
+        low++; high--;
     }
-    swap(arr[left], pivot);
-
-    return left;
+    return high;
 }
-void quickSort(vector<int>& arr, int left, int right) {
-    if (left >= right) return;
 
-    int pi = partition(arr, left, right);
+/* The main function that implements QuickSort
+ arr[] --> Array to be sorted,
+ low  --> Starting index,
+ high  --> Ending index */
+void quickSort(vector<int>& arr, int low, int high) {
+    if (low < high) {
 
-    quickSort(arr, left, pi - 1);
-    quickSort(arr, pi + 1, right);
+        /* pi is partitioning index, arr[pi] is now
+           at right place */
+        int pi = partition(arr, low, high);
+
+        // Separately sort elements before 
+        // partition and after partition
+        quickSort(arr, low, pi);
+        quickSort(arr, pi + 1, high);
+    }
 }
-int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(NULL);
-    cout.tie(NULL);
-    
-    vector<int> arr = {4,5,2,4,3,2,1,4,4};
-    quickSort(arr, 0, arr.size() - 1);
 
-    for (int it : arr) cout << it << " ";
+/* Function to print an array */
+void printArray(const vector<int>& arr) {
+    for (int i : arr)
+        cout << i << " ";
     cout << endl;
+}
 
+// Driver Code
+int main() {
+    vector<int> arr = { 10, 7 };
+    quickSort(arr, 0, arr.size() - 1);
+    cout << "Sorted array: \n";
+    printArray(arr);
     return 0;
 }
