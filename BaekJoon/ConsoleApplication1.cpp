@@ -49,7 +49,14 @@ void quickSort(vector<int>& arr, int low, int high) {
         quickSort(arr, pi + 1, high);
     }
 }
+void quickSelect(vector<int>& arr, int low, int high, int k) {
+    if (low >= high) return;
 
+    int pi = partition(arr, low, high);
+
+    if (k <= pi) quickSelect(arr, low, pi, k);
+    else quickSelect(arr, pi + 1, high, k);
+}
 /* Function to print an array */
 void printArray(const vector<int>& arr) {
     for (int i : arr)
@@ -59,9 +66,11 @@ void printArray(const vector<int>& arr) {
 
 // Driver Code
 int main() {
-    vector<int> arr = { 10, 7 };
-    quickSort(arr, 0, arr.size() - 1);
-    cout << "Sorted array: \n";
+    vector<int> arr = { 10, 7, 8, 9, 1, 5 };
+    int k = 2;
+    printArray(arr);
+    quickSelect(arr, 0, arr.size() - 1, k);
+    printArray(vector<int>(arr.begin(), arr.begin()+k));
     printArray(arr);
     return 0;
 }
