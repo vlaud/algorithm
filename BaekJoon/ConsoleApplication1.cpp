@@ -11,9 +11,9 @@ using int2d = vector<vector<int>>;
 #define endl "\n"
 
 int partition(vector<int>& arr, int low, int high) {
-    int pivot = arr[low];
+    int pivot = arr[high];
 
-    while (true) {
+    while (low < high) {
 
         // Find leftmost element greater than or
         // equal to pivot
@@ -24,12 +24,12 @@ int partition(vector<int>& arr, int low, int high) {
         while (arr[high] > pivot) high--;
 
         // If two pointers met.
-        if (low >= high) break;
-
-        swap(arr[low], arr[high]);
-        low++; high--;
+        if (low < high) {
+            swap(arr[low], arr[high]);
+            low++;
+        }
     }
-    return high;
+    return low;
 }
 
 /* The main function that implements QuickSort
@@ -45,8 +45,8 @@ void quickSort(vector<int>& arr, int low, int high) {
 
         // Separately sort elements before 
         // partition and after partition
-        quickSort(arr, low, pi);
-        quickSort(arr, pi + 1, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi, high);
     }
 }
 void quickSelect(vector<int>& arr, int low, int high, int k) {
@@ -54,8 +54,8 @@ void quickSelect(vector<int>& arr, int low, int high, int k) {
 
     int pi = partition(arr, low, high);
 
-    if (k <= pi) quickSelect(arr, low, pi, k);
-    else quickSelect(arr, pi + 1, high, k);
+    if (k <= pi) quickSelect(arr, low, pi - 1, k);
+    else quickSelect(arr, pi, high, k);
 }
 /* Function to print an array */
 void printArray(const vector<int>& arr) {
@@ -66,7 +66,7 @@ void printArray(const vector<int>& arr) {
 
 // Driver Code
 int main() {
-    vector<int> arr = { 10, 7, 8, 9, 1, 5 };
+    vector<int> arr = { 10, 7 };
     int k = 2;
     printArray(arr);
     quickSelect(arr, 0, arr.size() - 1, k);
