@@ -306,34 +306,162 @@ void quickSort(vector<int>& arr, int low, int high) {
 	quickSort(arr, pi + 1, high);
 }
 
+int func1(int N) {
+	int sum = 0;
+	int a = N / 3;
+	sum += 3 * a * (a + 1) / 2;
+
+	a = N / 5;
+	sum += 5 * a * (a + 1) / 2;
+
+	a = N / 15;
+	sum -= 15 * a * (a + 1) / 2;
+	return sum;
+}
+
+int func2(int arr[], int N) {
+	bool mp[101] = { false };
+
+	for (int i = 0; i < N; i++) {
+		if (mp[arr[i]]) return 1;
+		mp[100 - arr[i]] = true;
+	}
+
+	return 0;
+}
+
+int func3(int N) {
+	if (N == 1) return 1;
+	int l = 1, r = N / 2;
+
+	while (l <= r) {
+		long long mid = l + (r - l) / 2;
+
+		if (mid * mid == N) return 1;
+		else if (mid * mid < N) l = mid + 1;
+		else r = mid - 1;
+	}
+	return 0;
+}
+
+int func4(int N) {
+	int a = 1;
+
+	while (a * 2 <= N) {
+		a *= 2;
+	}
+	return a;
+}
+
+void test1() {
+	cout << "****** func1 test ******\n";
+	int n[3] = { 16, 34567, 27639 };
+	int ans[3] = { 60, 278812814, 178254968 };
+	for (int i = 0; i < 3; i++) {
+		int result = func1(n[i]);
+		cout << "TC #" << i << '\n';
+		cout << "expected : " << ans[i] << " result : " << result;
+		if (ans[i] == result) cout << " ... Correct!\n";
+		else cout << " ... Wrong!\n";
+	}
+	cout << "*************************\n\n";
+}
+
+void test2() {
+	cout << "****** func2 test ******\n";
+	int arr[3][4] = { {1,52,48}, {50,42}, {4,13,63,87} };
+	int n[3] = { 3, 2, 4 };
+	int ans[3] = { 1, 0, 1 };
+	for (int i = 0; i < 3; i++) {
+		int result = func2(arr[i], n[i]);
+		cout << "TC #" << i << '\n';
+		cout << "expected : " << ans[i] << " result : " << result;
+		if (ans[i] == result) cout << " ... Correct!\n";
+		else cout << " ... Wrong!\n";
+	}
+	cout << "*************************\n\n";
+}
+
+void test3() {
+	cout << "****** func3 test ******\n";
+	int n[3] = { 9, 693953651, 756580036 };
+	int ans[3] = { 1, 0, 1 };
+	for (int i = 0; i < 3; i++) {
+		int result = func3(n[i]);
+		cout << "TC #" << i << '\n';
+		cout << "expected : " << ans[i] << " result : " << result;
+		if (ans[i] == result) cout << " ... Correct!\n";
+		else cout << " ... Wrong!\n";
+	}
+	cout << "*************************\n\n";
+}
+
+void test4() {
+	cout << "****** func4 test ******\n";
+	int n[3] = { 5, 97615282, 1024 };
+	int ans[3] = { 4, 67108864, 1024 };
+	for (int i = 0; i < 3; i++) {
+		int result = func4(n[i]);
+		cout << "TC #" << i << '\n';
+		cout << "expected : " << ans[i] << " result : " << result;
+		if (ans[i] == result) cout << " ... Correct!\n";
+		else cout << " ... Wrong!\n";
+	}
+	cout << "*************************\n\n";
+}
+
 int main() {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
 	cout.tie(nullptr);
 
-	//vector<int> arr = { 4,8,7,1,2,3 };
-	////quickSort(arr, 0, arr.size()-1);
+	test1();
+	test2();
+	test3();
+	test4();
+
+	//vector<int> arr = { 4,5,6,7,2,3,1};
+	//quickSort(arr, 0, arr.size()-1);
 
 	//int k = 3; // 3번째 작은 수 (즉, index 2)
-	//int result = quickSelect(arr, 0, arr.size() - 1, k - 1);
+	//int result = partition(arr, 0, arr.size() - 1);
 	//cout << result << endl;
 	//for (int it : arr) cout << it << ' ';
 	//cout << endl;
 
-	LinkedList<int> list;
-	list.push_back(2);
-	list.push_back(3);
-	list.push_back(5);
-	list.push_back(8);
-	list.print();
-	cout << "List size: " << list.size() << endl;
+	//LinkedList<int> list;
+	//list.push_back(2);
+	//list.push_back(3);
+	//list.push_back(5);
+	//list.push_back(8);
+	//list.print();
+	//cout << "List size: " << list.size() << endl;
 
-	list.find(2);
-	list.insert_at(2, 4);
-	list.print();
-	list.contains(4);
-	list.contains(6);
-	list.erase_at(2);
-	list.print();
+	//list.find(2);
+	//list.insert_at(2, 4);
+	//list.print();
+	//list.contains(4);
+	//list.contains(6);
+	//list.erase_at(2);
+	//list.print();
+
+	//for (int i = 0; i < 5; i++) {
+	//	for (int j = 0; j <= i; j++) {
+	//		cout << "*";
+	//	}
+	//	cout << endl;
+	//}
+
+	//int n = 5;
+	//for (int i = 0; i < n; i++) {
+	//	for (int j = 0; j < i+n; j++) {
+	//		if (j < n - i - 1 || (i % 2) != (j % 2)) cout << " ";
+	//		else cout << "*";
+	//	}
+	//	if (i < 4) cout << endl;
+	//}
+
+	//cout << pow(3, 7) << endl;
+
 	return 0;
 }
