@@ -1,7 +1,7 @@
 ﻿#include <iostream>
-#include <list>
 #include <string>
 #include <algorithm>
+#include <stack>
 
 #define endl '\n'
 using namespace std;
@@ -22,17 +22,39 @@ int top() {
 	return dat[pos-1];
 }
 
-void test() {
-	push(5); push(4); push(3);
-	cout << top() << '\n'; // 3
-	pop(); pop();
-	cout << top() << '\n'; // 5
-	push(10); push(12);
-	cout << top() << '\n'; // 12
-	pop();
-	cout << top() << '\n'; // 10
-}
 
 int main(void) {
-	test();
+	stack<int> st;
+
+	int n;
+
+	cin >> n;
+
+	string input;
+	for (int i = 0; i < n; i++) {
+		cin >> input;
+		if (input == "push") {
+			cin >> input;
+			st.push(stoi(input));
+		}
+		else if (input == "pop") {
+			if (st.empty()) cout << -1 << endl;
+			else {
+				cout << st.top() << endl;
+				st.pop();
+			}
+		}
+		else if (input == "size") {
+			cout << st.size() << endl;
+		}
+		else if (input == "empty") {
+			cout << st.empty() << endl;
+		}
+		else {
+			if (st.empty()) cout << -1 << endl;
+			else cout <<  st.top() << endl;
+		}
+	}
+
+	return 0;
 }
