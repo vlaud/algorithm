@@ -1,7 +1,6 @@
 ﻿#include <iostream>
 #include <string>
 #include <algorithm>
-#include <stack>
 
 #define endl '\n'
 using namespace std;
@@ -24,8 +23,6 @@ int top() {
 
 
 int main(void) {
-	stack<int> st;
-
 	int n;
 
 	cin >> n;
@@ -35,24 +32,24 @@ int main(void) {
 		cin >> input;
 		if (input == "push") {
 			cin >> input;
-			st.push(stoi(input));
+			push(stoi(input));
 		}
 		else if (input == "pop") {
-			if (st.empty()) cout << -1 << endl;
+			if (!pos) cout << -1 << endl;
 			else {
-				cout << st.top() << endl;
-				st.pop();
+				cout << top() << endl;
+				pop();
 			}
 		}
 		else if (input == "size") {
-			cout << st.size() << endl;
+			cout << pos << endl;
 		}
 		else if (input == "empty") {
-			cout << st.empty() << endl;
+			cout << !pos << endl;
 		}
 		else {
-			if (st.empty()) cout << -1 << endl;
-			else cout <<  st.top() << endl;
+			if (!pos) cout << -1 << endl;
+			else cout <<  top() << endl;
 		}
 	}
 
