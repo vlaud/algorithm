@@ -6,26 +6,33 @@
 #define endl '\n'
 
 using namespace std;
-//const int MX = 1000005;
-//int dat[MX];
-//int head = 0, tail = 0;
-//
-//void push(int x) {
-//	dat[tail++] = x;
-//}
-//
-//void pop() {
-//	head++;
-//}
-//
-//int front() {
-//	return dat[head];
-//}
-//
-//int back() {
-//	return dat[tail - 1];
-//}
+const int MX = 1000005;
+int dat[MX];
+int head = 0, tail = 0;
 
+void push(int x) {
+	dat[tail++] = x;
+}
+
+void pop() {
+	head++;
+}
+
+int front() {
+	return dat[head];
+}
+
+int back() {
+	return dat[tail - 1];
+}
+
+bool empty() {
+	return head == tail;
+}
+
+int size() {
+	return tail - head;
+}
 
 int main(void) {
 	ios::sync_with_stdio(0);
@@ -37,29 +44,30 @@ int main(void) {
 	cin >> n;
 
 	string s;
-	queue<int> q;
+	//queue<int> q;
 
 	for (int i = 0; i < n; i++) {
 		cin >> s;
 		if (s == "push") {
 			cin >> s;
-			q.emplace(stoi(s));
+			//q.emplace(stoi(s));
+			push(stoi(s));
 		}
 		else if (s == "pop") {
-			cout << (q.empty() ? -1 : q.front()) << endl;
-			if (!q.empty()) q.pop();
+			cout << (empty() ? -1 : front()) << endl;
+			if (!empty()) pop();
 		}
 		else if (s == "size") {
-			cout << q.size() << endl;
+			cout << size() << endl;
 		}
 		else if (s == "empty") {
-			cout << q.empty() << endl;
+			cout << empty() << endl;
 		}
 		else if (s == "front") {
-			cout << (q.empty() ? -1 : q.front()) << endl;
+			cout << (empty() ? -1 : front()) << endl;
 		}
 		else {
-			cout << (q.empty() ? -1 : q.back()) << endl;
+			cout << (empty() ? -1 : back()) << endl;
 		}
 	}
 	return 0;
