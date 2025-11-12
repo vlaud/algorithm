@@ -1,86 +1,45 @@
 ﻿#include <iostream>
-#include <functional>
-#include <typeindex>
-#include <vector>
-#include <unordered_map>
-#include <any>
+#include <algorithm>
 
 #define endl '\n'
 
 using namespace std;
+using ll = long long;
+using iPair = pair<int, int>;
 
-enum class UserEvent { LOGIN = 0 };
-enum class DataEvent { CREATED = 0 };
-
-/// <summary>
-/// 커스텀 해시 함수
-/// </summary>
-struct PairHash {
-	template<typename T1, typename T2>
-	size_t operator()(const pair<T1, T2>& p) const {
-		auto h1 = hash<T1>{}(p.first);
-		auto h2 = hash<T2>{}(p.second);
-		return h1 ^ (h2 << 1);
-	}
-};
-
-/// <summary>
-/// 통합 이벤트 버스
-/// </summary>
-class UnifiedEventBus {
-	using typeIdx = pair<type_index, int>;
-private:
-	unordered_map<typeIdx, vector<function<void(const any&)>>, PairHash> subscribers;
-
-public:
-	template<typename EventEnum, typename DataType>
-	void subscribe(EventEnum eventType, function<void(const DataType&)> callback) {
-		auto key = make_pair(type_index(typeid(EventEnum)), static_cast<int>(eventType));
-		subscribers[key].emplace_back([callback](const any& data) {
-			try {
-				callback(any_cast<const DataType&>(data));
-			}
-			catch (const bad_any_cast&) {
-				cerr << "Type mismatch!" << endl;
-			}
-			});
-	}
-
-	template<typename EventEnum>
-	void subscribe(EventEnum eventType, function<void()> callback) {
-		auto key = make_pair(type_index(typeid(EventEnum)), static_cast<int>(eventType));
-		subscribers[key].emplace_back([callback](const any&) {
-			callback();
-			});
-	}
-
-	template<typename EventEnum, typename DataType>
-	void publish(EventEnum eventType, const DataType& data) {
-		auto key = make_pair(type_index(typeid(EventEnum)), static_cast<int>(eventType));
-		if (subscribers.find(key) != subscribers.end()) {
-			any anyData = data;
-			for (auto& callback : subscribers[key]) callback(anyData);
-		}
-	}
-
-	template<typename EventEnum>
-	void publish(EventEnum eventType) {
-		auto key = make_pair(type_index(typeid(EventEnum)), static_cast<int>(eventType));
-
-		if (subscribers.find(key) != subscribers.end()) {
-			any emptyData;
-			for (auto& callback : subscribers[key]) callback(emptyData);
-		}
-	}
-};
+iPair xa[static_cast<int>(1e5)];
 
 int main() {
-	UnifiedEventBus bus;
+	ios::sync_with_stdio(0);
+	cin.tie(0);
+	cout.tie(0);
 
-	bus.subscribe(UserEvent::LOGIN, []() {cout << "UserEvent::LOGIN" << endl; });
-	bus.subscribe(DataEvent::CREATED, []() {cout << "DataEvent::CREATED" << endl; });
+	int n, idx = 0;
+	ll sum = 0;
+	
+	cin >> n;
+	
+	for (int i = 0; i<n; i++){
+		cin >> xa[i].first >> xa[i].second;
+		xa[i].first += 1e9;
+	}
 
-	bus.publish(UserEvent::LOGIN);
-	bus.publish(DataEvent::CREATED);
+	ll s, l = 0, r = 2e9;
+	ll mid = l + (r - l) / 2;
+
+	while (l < r) {
+		s = 0;
+		for (int i = 0; i < n; i++) {
+			s += (abs(xa[i].first - mid - 1) - abs(xa[i].first - mid)) * xa[i].second;
+		}
+		if (s >= 0) r = mid;
+		else l = mid + 1;
+
+		mid = l + (r - l) / 2;
+	}
+
+	mid -= 1e9;
+	cout << mid;
+
 	return 0;
 }
