@@ -1,97 +1,48 @@
 ﻿#include <iostream>
-#include <string>
+#include <vector>
+#include <queue>
 
 #define endl '\n'
 
 using namespace std;
 
-const int mx = 1000005;
-int dat[2 * mx + 1];
-int head = mx, tail = mx;
-
-void push_front(int x) {
-	dat[--head] = x;
-}
-
-void push_back(int x) {
-	dat[tail++] = x;
-}
-
-void pop_front() {
-	head++;
-}
-
-void pop_back() {
-	tail--;
-}
-
-int front() {
-	return dat[head];
-}
-
-int back() {
-	return dat[tail - 1];
-}
-
-bool empty() {
-	return head == tail;
-}
-
-int size() {
-	return tail - head;
-}
+using int2d = vector<vector<int>>;
 
 int main() {
 	ios::sync_with_stdio(0);
 	cin.tie(0);
 	cout.tie(0);
 	
-	int n;
+	int n, m;
 
-	cin >> n;
+	cin >> n >> m;
 
-	string s;
-	int a;
-	while (n--) {
-		cin >> s;
+	vector<int> idg(n+1);
+	int2d adj(n+1);
 
-		if (s == "push_front") {
-			cin >> a;
-			push_front(a);
-		}
-		else if (s == "push_back") {
-			cin >> a;
-			push_back(a);
-		}
-		else if (s == "pop_front") {
-			if (!empty()) {
-				cout << front() << endl;
-				pop_front();
-			}
-			else cout << -1 << endl;
-		}
-		else if (s == "pop_back") {
-			if (!empty()) {
-				cout << back() << endl;
-				pop_back();
-			}
-			else cout << -1 << endl;
-		}
-		else if (s == "size") {
-			cout << size() << endl;
-		}
-		else if (s == "empty") {
-			cout << (empty()) << endl;
-		}
-		else if (s == "front") {
-			if (!empty()) cout << front() << endl;
-			else cout << -1 << endl;
-		}
-		else {
-			if (!empty()) cout << back() << endl;
-			else cout << -1 << endl;
-		}
+	int a, b;
+	while (m--) {
+		cin >> a >> b;
+
+		adj[a].emplace_back(b);
+		idg[b]++;
 	}
+	queue<int> q;
+
+	for (int i = 1; i <= n; i++) {
+		if (!idg[i]) q.emplace(i);
+	}
+
+	while (!q.empty()) {
+		int x = q.front(); q.pop();
+
+		cout << x << " ";
+		for (int& i : adj[x]) {
+			if (--idg[i] == 0) q.emplace(i);
+		}
+
+	}
+
 
 	return 0;
 }
