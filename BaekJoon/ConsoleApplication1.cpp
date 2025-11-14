@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <string>
 
 #define endl '\n'
 
@@ -29,23 +30,68 @@ int front() {
 }
 
 int back() {
-	return dat[tail-1];
+	return dat[tail - 1];
 }
 
-void test() {
-	push_back(30); // 30
-	cout << front() << '\n'; // 30
-	cout << back() << '\n'; // 30
-	push_front(25); // 25 30
-	push_back(12); // 25 30 12
-	cout << back() << '\n'; // 12
-	push_back(62); // 25 30 12 62
-	pop_front(); // 30 12 62
-	cout << front() << '\n'; // 30
-	pop_front(); // 12 62
-	cout << back() << '\n'; // 62
+bool empty() {
+	return head == tail;
 }
 
-int main(void) {
-	test();
+int size() {
+	return tail - head;
+}
+
+int main() {
+	ios::sync_with_stdio(0);
+	cin.tie(0);
+	cout.tie(0);
+	
+	int n;
+
+	cin >> n;
+
+	string s;
+	int a;
+	while (n--) {
+		cin >> s;
+
+		if (s == "push_front") {
+			cin >> a;
+			push_front(a);
+		}
+		else if (s == "push_back") {
+			cin >> a;
+			push_back(a);
+		}
+		else if (s == "pop_front") {
+			if (!empty()) {
+				cout << front() << endl;
+				pop_front();
+			}
+			else cout << -1 << endl;
+		}
+		else if (s == "pop_back") {
+			if (!empty()) {
+				cout << back() << endl;
+				pop_back();
+			}
+			else cout << -1 << endl;
+		}
+		else if (s == "size") {
+			cout << size() << endl;
+		}
+		else if (s == "empty") {
+			cout << (empty()) << endl;
+		}
+		else if (s == "front") {
+			if (!empty()) cout << front() << endl;
+			else cout << -1 << endl;
+		}
+		else {
+			if (!empty()) cout << back() << endl;
+			else cout << -1 << endl;
+		}
+	}
+
+	return 0;
 }
