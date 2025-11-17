@@ -1,48 +1,37 @@
 ﻿#include <iostream>
-#include <vector>
-#include <queue>
-
-#define endl '\n'
+#include <algorithm>
 
 using namespace std;
 
-using int2d = vector<vector<int>>;
+#define endl '\n'
+
+int logg[10000];
 
 int main() {
 	ios::sync_with_stdio(0);
 	cin.tie(0);
 	cout.tie(0);
-	
-	int n, m;
 
-	cin >> n >> m;
+	int t;
+	cin >> t;
 
-	vector<int> idg(n+1);
-	int2d adj(n+1);
+	int n;
+	while (t--) {
+		cin >> n;
 
-	int a, b;
-	while (m--) {
-		cin >> a >> b;
+		for (int i = 0; i < n; i++) {
+			cin >> logg[i];
+		}
+		sort(logg, logg + n);
 
-		adj[a].emplace_back(b);
-		idg[b]++;
-	}
-	queue<int> q;
+		int size = logg[1] - logg[0];
+		size = max(size, logg[n - 1] - logg[n - 2]);
 
-	for (int i = 1; i <= n; i++) {
-		if (!idg[i]) q.emplace(i);
-	}
-
-	while (!q.empty()) {
-		int x = q.front(); q.pop();
-
-		cout << x << " ";
-		for (int& i : adj[x]) {
-			if (--idg[i] == 0) q.emplace(i);
+		for (int i = 0; i < n-2; i++) {
+			size = max(size, logg[i + 2] - logg[i]);
 		}
 
+		cout << size << endl;
 	}
-
-
 	return 0;
 }
