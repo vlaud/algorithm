@@ -2,98 +2,66 @@
 #include <algorithm>
 #include <vector>
 #include <queue>
+#include <string>
+#include <typeinfo>
+
 using namespace std;
 
 #define endl '\n'
 
-unsigned int count_trailing_zeros(unsigned int x) {
-	unsigned long index;
-	if (x == 0) {
-		// __builtin_ctz(0)는 undefined behaviour 이므로
-		return /* 원하는 값, 예컨대 sizeof(x)*8 */ 32;
-	}
-	_BitScanForward(&index, x);
-	return static_cast<unsigned int>(index);
-}
-
-void dfs(vector<vector<int>> &grp, bool *visited, int idx)
-{
-	if (visited[idx])
-		return;
-	visited[idx] = true;
-	cout << idx << " ";
-	for (int &i : grp[idx])
-	{
-		dfs(grp, visited, i);
-	}
-}
-
-// 큐 안쓰고
-void bitbfs(vector<vector<int>> &grp, bool *visited, int idx)
-{
-	int bit = 0;
-	bit |= (1 << idx);
-
-	while (bit)
-	{
-		int x = count_trailing_zeros(bit);
-		bit &= ~(1 << x);
-		visited[x] = true;
-		cout << x << " ";
-		for (int &i : grp[x])
-		{
-			if (visited[i])
-				continue;
-			bit |= (1 << i);
-		}
-	}
-}
-
-void bfs(vector<vector<int>> &grp, bool *visited, int idx)
-{
-	queue<int> q;
-	q.emplace(idx);
-	while (!q.empty())
-	{
-		int x = q.front();
-		q.pop();
-		visited[x] = true;
-		cout << x << " ";
-		for (int &i : grp[x])
-		{
-			if (visited[i])
-				continue;
-			q.emplace(i);
-		}
-	}
-}
-
 int main()
 {
-	int n = 7;
-	vector<vector<int>> grp(n);
-	bool visited[7];
+	int arr[2][3] = { {1,2,3},
+					  {4,5,6}, };
 
-	grp[0].emplace_back(1);
-	grp[1].emplace_back(0);
-	grp[0].emplace_back(2);
-	grp[2].emplace_back(0);
-
-	grp[1].emplace_back(3);
-	grp[3].emplace_back(1);
-	grp[1].emplace_back(4);
-	grp[4].emplace_back(1);
-
-	grp[2].emplace_back(5);
-	grp[2].emplace_back(6);
-	grp[5].emplace_back(2);
-	grp[6].emplace_back(2);
-
-	fill(visited, visited + 7, false);
-
-	dfs(grp, visited, 0);
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < 3; j++) {
+			printf("%d ", arr[i][j]);
+		}
+		cout << endl;
+	}
+	int (*pt)[3] = arr;
+	int att[2] = { 1,3 };
+	int* p = att;
+	int* pthh[3] = { new int[2]{1,5}, new int[3]{4,5,5}, new int[2]{2,6} };
 	cout << endl;
-	fill(visited, visited + 7, false);
-	bitbfs(grp, visited, 0);
+
+	printf("pt[0][2] = %d\n", pt[0][2]);
+	printf("typeid(arr) = %s\n", typeid(arr).name());
+	printf("typeid(&arr[0]) = %s\n", typeid(&arr[0]).name());
+	printf("typeid(*arr) = %s\n", typeid(*arr).name());
+	printf("typeid(arr[0]) = %s\n", typeid(arr[0]).name());
+	printf("typeid(&arr[0][0]) = %s\n", typeid(&arr[0][0]).name());
+	printf("typeid(**arr) = %s\n", typeid(**arr).name());
+	printf("typeid(*arr[0]) = %s\n", typeid(*arr[0]).name());
+	printf("typeid(att) = %s\n", typeid(att).name());
+	printf("typeid(p) = %s\n", typeid(p).name());
+	printf("typeid(pthh) = %s\n", typeid(pthh).name());
+	printf("typeid(pthh[0][1]) = %s\n", typeid(pthh[0][1]).name());
+	printf("typeid(&pthh[0][1]) = %s\n", typeid(&pthh[0][1]).name());
+	printf("pthh[0][1] = %d\n", pthh[0][1]);
+
+	cout << endl;
+	cout << "[] == *" << endl;
+	cout << "배열은 포인터다" << endl;
+	cout << endl;
+	const char* str[3] = {"df", "ee", "gwegwe"};
+	const char **ptt = str;
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < str[i][j]; j++) {
+			cout << str[i][j];
+		}
+		cout << endl;
+	}
+
+	cout << endl;
+	cout << "이중 포인터" << endl;
+	printf("typeid(str) = %s\n", typeid(str).name());
+	printf("typeid(str[0]) = %s\n", typeid(str[0]).name());
+	printf("typeid(&str[0]) = %s\n", typeid(&str[0]).name());
+	printf("typeid(ptt) = %s\n", typeid(ptt).name());
+	
+	printf("ptt[0] = %s\n", ptt[0]);
+
 	return 0;
 }
