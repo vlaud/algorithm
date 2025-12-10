@@ -1,30 +1,35 @@
 ﻿#include <iostream>
 #include <algorithm>
-using namespace std;
+#include <vector>
+#include <string>
 
 #define endl '\n'
+using namespace std;
 
 int main() {
-	ios::sync_with_stdio(0);
-	cin.tie(0);
-	cout.tie(0);
+    ios::sync_with_stdio(0);
+    cin.tie(0); cout.tie(0);
 
-	int n, k;
+    int n, m, x = 0;
 
-	cin >> n >> k;
+    cin >> n >> m;
+    vector<int> prev(m), cur(m);
+    string s;
+    for (int i = 0; i < n; i++) {
+        cin >> s;
+        for (int j = 0; j < m; j++) {
+            if (s[j] == '0') {
+                cur[j] = 0;
+                continue;
+            }
+            
+            if (i == 0 || j == 0) cur[j] = 1;
+            else cur[j] = min({cur[j-1], prev[j-1], prev[j]}) + 1;
 
-
-	int mx = 0;
-
-	while (--n) {
-		int x; cin >> x;
-		if (mx > x + k) {
-			cout << "NO" << endl;
-			return 0;
-		}
-		mx = max(x, mx);
-	}
-
-	cout << "YES" << endl;
-	return 0;
+            x = max(cur[j], x);
+        }
+        prev = cur;
+    }
+    cout << x * x;
+    return 0;
 }
