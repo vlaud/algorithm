@@ -1,35 +1,35 @@
 ﻿#include <iostream>
-#include <algorithm>
-#include <vector>
-#include <string>
+#include <stack>
+using namespace std;
 
 #define endl '\n'
-using namespace std;
+#define ll long long
 
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0); cout.tie(0);
 
-    int n, m, x = 0;
+    int n;
 
-    cin >> n >> m;
-    vector<int> prev(m), cur(m);
-    string s;
-    for (int i = 0; i < n; i++) {
-        cin >> s;
-        for (int j = 0; j < m; j++) {
-            if (s[j] == '0') {
-                cur[j] = 0;
-                continue;
+    while (true) {
+        cin >> n;
+        if (!n) break;
+
+        stack<pair<int,int>> st;
+        ll size = 0;
+        for (int i = 0; i <= n; i++) {
+            int num;
+            if (i != n) cin >> num;
+            while (!st.empty() && (i == n || st.top().first > num)) {
+                ll h = st.top().first; st.pop();
+                int w = st.empty() ? i : i - st.top().second - 1;
+                size = max(size, h * w);
             }
             
-            if (i == 0 || j == 0) cur[j] = 1;
-            else cur[j] = min({cur[j-1], prev[j-1], prev[j]}) + 1;
-
-            x = max(cur[j], x);
+            st.emplace(pair<int,int>({ num, i }));
         }
-        prev = cur;
+        cout << size << endl;
     }
-    cout << x * x;
+
     return 0;
 }
