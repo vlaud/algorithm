@@ -1,38 +1,39 @@
 ﻿#include <iostream>
 #include <queue>
+#include <tuple>
 
 using namespace std;
-using iPair = pair<int, int>;
+using int3 = tuple<int, int, int>;
 #define endl '\n'
 
-int board[500][500];
+int bfs(vector<string>& s, int n, int m) {
+	queue<int3> q;
 
-int bfs(int row, int col, int n, int m) {
-	queue<iPair> q;
-
-	q.emplace(row, col);
-	board[row][col] = 0;
-	int size = 0;
+	int time = 1;
+	q.emplace(0, 0, 1);
+	s[0][0] = '0';
 
 	while (!q.empty()) {
-		auto [r, c] = q.front(); q.pop();
-		
-		size++;
-		
+		auto [r, c, t] = q.front(); q.pop();
+		time = t;
+
+		if (r == n - 1 && c == m - 1) break;
 		for (int i = -1; i < 2; i += 2) {
-			int nr = r + i;
-			int nc = c + i;
-			if (0 <= nr && nr < n && board[nr][c]) {
-				q.emplace(nr, c);
-				board[nr][c] = 0;
+			int nr = r + i, nc = c + i;
+			
+			if (0 <= nr && nr < n && s[nr][c] == '1') {
+				q.emplace(nr, c, t + 1);
+				s[nr][c] = '0';
 			}
-			if (0 <= nc && nc < m && board[r][nc]) {
-				q.emplace(r, nc);
-				board[r][nc] = 0;
+			if (0 <= nc && nc < m && s[r][nc] == '1') {
+				q.emplace(r, nc, t + 1);
+				s[r][nc] = '0';
 			}
 		}
+		
 	}
-	return size;
+
+	return time;
 }
 int main() {
 	ios::sync_with_stdio(0);
@@ -41,24 +42,12 @@ int main() {
 	int n, m;
 
 	cin >> n >> m;
-
-	int count = 0, res = 0;
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < m; j++) {
-			cin >> board[i][j];
-		}
-	}
+	vector<string> s(n);
 
 	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < m; j++) {
-			if (!board[i][j]) continue;
-			count++;
-			int a = bfs(i, j, n, m);
-			res = max(res, a);
-		}
+		cin >> s[i];
 	}
 
-	cout << count << endl;
-	cout << res << endl;
+	cout << bfs(s, n, m);
 	return 0;
 }
