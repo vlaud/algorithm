@@ -1,53 +1,149 @@
 ﻿#include <iostream>
-#include <queue>
-#include <tuple>
 
 using namespace std;
-using int3 = tuple<int, int, int>;
-#define endl '\n'
 
-int bfs(vector<string>& s, int n, int m) {
-	queue<int3> q;
+#define mx 10000
 
-	int time = 1;
-	q.emplace(0, 0, 1);
-	s[0][0] = '0';
+class str
+{
+private:
+	int size, max_size;
+	char* words;
+	void updateSize();
+	int getsize(const char* string);
 
-	while (!q.empty()) {
-		auto [r, c, t] = q.front(); q.pop();
-		time = t;
+public:
+	str();
+	~str();
 
-		if (r == n - 1 && c == m - 1) break;
-		for (int i = -1; i < 2; i += 2) {
-			int nr = r + i, nc = c + i;
-			
-			if (0 <= nr && nr < n && s[nr][c] == '1') {
-				q.emplace(nr, c, t + 1);
-				s[nr][c] = '0';
-			}
-			if (0 <= nc && nc < m && s[r][nc] == '1') {
-				q.emplace(r, nc, t + 1);
-				s[r][nc] = '0';
-			}
-		}
-		
-	}
+	void operator=(const char* string);
+	void operator+=(const char* string);
+	bool operator==(const char* string);
+	char* wPtr();
+	int getsize();
+};
 
-	return time;
+str::str()
+{
+	size = 0;
+	max_size = mx;
+	words = new char[max_size + 1];
 }
-int main() {
-	ios::sync_with_stdio(0);
-	cin.tie(0); cout.tie(0);
 
-	int n, m;
+str::~str()
+{
+	delete(words);
+	words = nullptr;
+}
 
-	cin >> n >> m;
-	vector<string> s(n);
+void str::operator=(const char* string)
+{
+	size = getsize(string);
+	updateSize();
 
-	for (int i = 0; i < n; i++) {
-		cin >> s[i];
+	for (int i = 0; i < size; i++)
+	{
+		words[i] = string[i];
+	}
+}
+
+void str::operator+=(const char* string)
+{
+	char* old = words;
+	int oldsize = size;
+	size += getsize(string);
+
+	updateSize();
+
+	for (int i = 0; i < oldsize; i++)
+	{
+		words[i] = old[i];
+	}
+	for (int i = oldsize; i < size; i++)
+	{
+		words[i] = string[i - oldsize];
+	}
+}
+
+bool str::operator==(const char* string)
+{
+	if (size != getsize(string)) return false;
+
+	for (int i = 0; i < size; i++)
+	{
+		if (words[i] != string[i]) return false;
 	}
 
-	cout << bfs(s, n, m);
+	return true;
+}
+
+void str::updateSize()
+{
+	if (size <= max_size) return;
+	max_size = size;
+	words = new char[max_size + 1];
+}
+
+char* str::wPtr()
+{
+	return words;
+}
+
+int str::getsize(const char* string)
+{
+	int tsize = 0;
+	while (string[tsize] != '\0')
+	{
+		tsize++;
+	}
+	return tsize;
+}
+
+int str::getsize()
+{
+	return size;
+}
+
+ostream& operator<<(ostream& os, str& string)
+{
+	for (int i = 0; i < string.getsize(); i++)
+	{
+		os << string.wPtr()[i];
+	}
+	return os;
+}
+
+istream& operator>>(istream& is, str& string)
+{
+	char words[256] = {};
+	is >> words;
+	string = words;
+	return is;
+}
+
+int main()
+{
+	str s;
+	s = "amorcito";
+	cout << s << "\n";
+
+	s += "love";
+	cout << s << "\n";
+
+	s = "love";
+	cout << s << "\n";
+
+	s += "you";
+	cout << s << "\n";
+
+	cout << (s == "loveyou") << endl;
+	cout << (s == "loveyo") << endl;
+	cout << (s == "loveytt") << endl;
+
+	cin >> s;
+	cout << s << "\n";
+
+	cin >> s;
+	cout << s << "\n";
 	return 0;
 }
