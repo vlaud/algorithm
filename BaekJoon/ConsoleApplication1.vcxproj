@@ -133,9 +133,11 @@
   <ItemGroup>
     <ClCompile Include="Cat.cpp" />
     <ClCompile Include="ConsoleApplication1.cpp" />
+    <ClCompile Include="time.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cat.h" />
+    <ClInclude Include="time.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
