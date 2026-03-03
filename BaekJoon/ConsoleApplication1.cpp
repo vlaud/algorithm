@@ -1,72 +1,68 @@
 ﻿#include <iostream>
-#include <vector>
-#include <algorithm>
+
 using namespace std;
 
-using int2d = vector<vector<int>>;
-using ll = long long;
+#define mx 20
 
-int2d twoSum(vector<int> arr, int s, int n, ll target)
+class Text
 {
-	int2d res;
-	int l = s, r = n - 1;
-
-	while (l < r)
+public:
+	static void SetText(char* var, const char* txt)
 	{
-		ll sum = arr[l] + arr[r];
-		if (sum == target)
+		for (int i = 0; i < mx; i++)
 		{
-			res.emplace_back(vector<int>({ arr[l++], arr[r--] }));
-			while (l < r && arr[l] == arr[l - 1]) l++;
-			while (l < r && arr[r] == arr[r + 1]) r--;
-		}
-		else if (sum < target) l++;
-		else r--;
-	}
-	return res;
-}
-int2d kSum(vector<int> arr, int s, int n, int k, ll target)
-{
-	int2d res;
-
-	if (s == n) return res;
-
-	ll average = target / k;
-
-	if (average < arr[s] || arr.back() < average) return res;
-
-	if (k == 2) return twoSum(arr, s, n, target);
-
-	for (int i = s; i < n; i++)
-	{
-		if (s != i && arr[i] == arr[i - 1]) continue;
-
-		for (auto& sub : kSum(arr, i + 1, n, k - 1, static_cast<ll>(target - arr[i])))
-		{
-			res.emplace_back(vector<int>({ arr[i] }));
-			res.back().insert(res.back().end(), sub.begin(), sub.end());
+			var[i] = txt[i];
+			if (var[i] == '\0') break;
 		}
 	}
-
-	return res;
-}
-
-int2d GetKSum(vector<int> arr, int k, ll target)
+};
+class Animal
 {
-	sort(arr.begin(), arr.end());
-	return kSum(arr, 0, arr.size(), k, target);
-}
+protected:
+	char name[mx] = "";
+public:
+	Animal(const char* name)
+	{
+		Text::SetText(this->name, name);
+	}
+	virtual void Speak() = 0;
+};
+
+class Dog : public Animal
+{
+public:
+	Dog(const char* name);
+	void Speak() override
+	{
+		cout << "barks!" << endl;
+	}
+};
+
+/// <summary>
+/// 부모의 생성자 오버라이딩
+/// </summary>
+/// <param name="name"></param>
+Dog::Dog(const char* name) : Animal(name) {}
+
+class Cat : public Animal
+{
+public:
+	Cat(const char* name);
+	void Speak() override
+	{
+		cout << "meows!" << endl;
+	}
+};
+
+Cat::Cat(const char* name) : Animal(name) {}
+
 int main()
 {
-	vector<int> arr = { 1,0,-1,0,-2,2 };
-
-	for (auto& sub : GetKSum(arr, 4, 0))
+	Dog d1("Baekgu"); Cat c1("Nabi");
+	Animal* animals[] = { &d1, &c1 };
+	for (int i = 0; i < 2; i++)
 	{
-		for (auto& i : sub)
-		{
-			printf("%d ", i);
-		}
-		cout << endl;
+		animals[i]->Speak();
 	}
 	return 0;
 }
