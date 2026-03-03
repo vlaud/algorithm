@@ -2,56 +2,59 @@
 
 using namespace std;
 
-#define mx 30
-class Book
+class Vehicle
 {
-protected:
-	char title[mx] = "";
-	char writer[mx] = "";
 public:
-	Book(const char* title, const char* writer)
+	virtual void StartEngine() = 0;
+	virtual void Drive() = 0;
+	virtual void StopEngine() = 0;
+};
+
+class Car : public Vehicle
+{
+public:
+	void StartEngine()
 	{
-		strcpy_s(this->title, title);
-		strcpy_s(this->writer, writer);
+		printf("자동차 엔진 시동!\n");
 	}
-	virtual void Display()
+	void Drive()
 	{
-		printf("제목 : %s\n", title);
-		printf("저자 : %s\n", writer);
+		printf("부릉 부릉~!\n");
+	}
+	void StopEngine()
+	{
+		printf("자동차가 멈췄다\n\n");
+	}
+};
+class Motorcycle : public Vehicle
+{
+public:
+	void StartEngine()
+	{
+		printf("오토바이 엔진 시동!\n");
+	}
+	void Drive()
+	{
+		printf("부와앙~!\n");
+	}
+	void StopEngine()
+	{
+		// 원시 문자열 리터럴
+		cout << R"(!@#@!#!%#@&)" << endl;
+		printf("오토바이가 멈췄다\n\n");
 	}
 };
 
-class EBook : public Book
-{
-private:
-	double cap = 0.0;
-public:
-	EBook(const char* title, const char* writer, double cap) : Book(title, writer), cap(cap) {}
-	void Display()
-	{
-		Book::Display();
-		printf("파일 크기 : %.1lfmb\n\n", cap);
-	}
-};
 
-class PaperBook : public Book
-{
-private:
-	int pages = 0;
-public:
-	PaperBook(const char* title, const char* writer, int pages) : Book(title, writer), pages(pages) {}
-	void Display()
-	{
-		Book::Display();
-		printf("페이지 수 : %d 페이지\n", pages);
-	}
-};
 int main()
 {
-	EBook eb("Clean Code", "Robert Martin", 5.2);
-	PaperBook pb("Refactoring", "Martin Fowler", 450);
-	Book* books[] = { &eb, &pb };
+	Car c; Motorcycle m;
+	Vehicle* vehicles[] = { &c, &m };
 	for (int i = 0; i < 2; i++)
-		books[i]->Display();
+	{
+		vehicles[i]->StartEngine();
+		vehicles[i]->Drive();
+		vehicles[i]->StopEngine();
+	}
 	return 0;
 }
