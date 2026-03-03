@@ -1,110 +1,132 @@
 ﻿#include <iostream>
+#include <vector>
+#include <numeric>
+#include <unordered_map>
+#include <algorithm>
 
 using namespace std;
+using str2d = vector<vector<string>>;
 
-class NQueens
+/// <summary>
+/// 서로소 집합
+/// </summary>
+class dsu
 {
-public:
-	NQueens(int n) : mSize(n)
-	{
-		for (int i = 0; i < MAX_SIZE; i++)
-		{
-			for (int j = 0; j < MAX_SIZE; j++)
-			{
-				mBoard[i][j] = 0;
-			}
-			mPath[i] = -1;
-		}
-	}
-
-	void Solve()
-	{
-		SolveRecursive(0);
-		cout << "총 " << mSolutionCount << "개의 해가 있습니다." << endl;
-	}
 private:
-	static const int MAX_SIZE = 10;
-	int mBoard[MAX_SIZE][MAX_SIZE];
-	int mPath[MAX_SIZE]; // 각 행에서 퀸의 열 위치
-	int mSize;
-	int mSolutionCount = 0;
-
-	bool IsSafe(int row, int col)
+	vector<int> par, size;
+public:
+	/// <summary>
+	/// n의 크기만큼 각 원소들의 집합 생성
+	/// 각 부모의 원소는 자기 자신, 크기는 1로 초기화
+	/// </summary>
+	/// <param name="n"></param>
+	dsu(int n)
 	{
-		// 같은 열에 퀸이 있는지 확인
-		for (int i = 0; i < row; i++)
-		{
-			if (mPath[i] == col)
-				return false;
-		}
-
-		// 대각선에 퀸이 있는지 확인
-		for (int i = 0; i < row; i++)
-		{
-			//행 차이 = abs(i-row)
-			//열 차이 = abs(mPath[i]-col)
-			//행, 열 차이가 같으면 대각선에 퀸이 있음
-
-			if (abs(mPath[i] - col) == abs(i - row))
-				return false;
-		}
-
-		return true;
+		par.resize(n);
+		iota(begin(par), end(par), 0);
+		size.resize(n, 1);
 	}
 
-	void SolveRecursive(int row)
+	/// <summary>
+	/// 원소의 부모 찾기
+	/// </summary>
+	/// <param name="x"></param>
+	/// <returns></returns>
+	int find(int x)
 	{
-		if (row == mSize)
+		while (x != par[x])
 		{
-			mSolutionCount++;
-			PrintSolution();
-			return;
+			par[x] = par[par[x]];
+			x = par[x];
+		}
+		return x;
+	}
+
+	/// <summary>
+	/// a와 b를 합친 집합
+	/// </summary>
+	/// <param name="a"></param>
+	/// <param name="b"></param>
+	void merge(int a, int b)
+	{
+		a = find(a);
+		b = find(b);
+
+		if (a == b) return;
+
+		if (size[a] < size[b])
+		{
+			swap(a, b);
 		}
 
-		for (int col = 0; col < mSize; col++)
+		par[b] = a;
+		size[a] += size[b];
+	}
+};
+
+
+int main()
+{
+	str2d emails =
+	{
+		{"tom", "tom@aa", "tom@bb"},
+		{"jin", "jin@cc", "jin@dd"},
+		{"tom", "tom@cc", "tom@dd"},
+		{"jin", "jin@ss", "jin@tt"},
+		{"tom", "tom@bb", "tom@cc"},
+	};
+
+	int n = emails.size();
+
+	unordered_map<string, int> mp;
+	dsu ds(n);
+
+	
+	for (int i = 0; i < n; i++)
+	{
+		// 이름 (0번 원소는) 스킵
+		for (int j = 1; j < emails[i].size(); j++)
 		{
-			if (IsSafe(row, col))
-			{
-				mPath[row] = col; // 경로 기록
-				mBoard[row][col] = 1; // 퀸 배치
-				SolveRecursive(row + 1);
-				mBoard[row][col] = 0; // 백트래킹
-				mPath[row] = -1;
-			}
+			// 해시맵에 이메일이 있으면 병합
+			// 없으면 i 인덱스 (이메일 주인 인덱스)를 삽입
+			auto& e = emails[i][j];
+			if (mp.find(e) != mp.end()) ds.merge(mp[e], i);
+			else mp[e] = i;
 		}
 	}
 
-	void PrintSolution()
+	// 임시 2차원 벡터 생성
+	str2d temp(n);
+	for (auto [e, i] : mp)
 	{
-		cout << "Solution " << mSolutionCount << ":" << endl;
-		for (int i = 0; i < mSize; i++)
+		// 해시맵에 저장된 인덱스의 부모 찾기
+		int par = ds.find(i);
+
+		// 부모 인덱스 위치에 이메일 삽입
+		temp[par].emplace_back(e);
+	}
+
+	str2d res;
+	for (int i = 0; i < n; i++)
+	{
+		if (temp[i].empty()) continue;
+
+		// 이메일을 정렬
+		sort(begin(temp[i]), end(temp[i]));
+
+		// 이메일 주인의 이름을 먼저 삽입 후 소유한 이메일들을 뒤에 붙인다
+		res.emplace_back(vector<string>({ emails[i][0] }));
+		res.back().insert(res.back().end(), temp[i].begin(), temp[i].end());
+	}
+
+	for (auto& e : res)
+	{
+		for (string& s : e)
 		{
-			for (int j = 0; j < mSize; j++)
-			{
-				cout << (mBoard[i][j] ? "Q " : ". ");
-			}
-			cout << endl;
+			printf("%s ", s.c_str());
 		}
 		cout << endl;
 	}
-};
-int main()
-{
-	int n;
-	cout << "N-Queens 문제 해결기" << endl;
-	cout << "체스판 크기를 입력 (1-10): ";
-	cin >> n;
 
-	// 입력 검증
-	if (n < 1 || n > 10)
-	{
-		cout << "잘못된 입력입니다. 1~10 사이의 숫자를 입력해주세요" << endl;
-		return 1;
-	}
-
-	cout << endl << n << "x" << n << " 체스판에서 " << n << "개의 퀸을 배치하는 모든 경우:" << endl << endl;
-
-	NQueens nqueens(n);
-	nqueens.Solve();
 	return 0;
 }
