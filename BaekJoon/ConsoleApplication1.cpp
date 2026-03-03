@@ -2,67 +2,56 @@
 
 using namespace std;
 
-#define mx 20
-
-class Text
-{
-public:
-	static void SetText(char* var, const char* txt)
-	{
-		for (int i = 0; i < mx; i++)
-		{
-			var[i] = txt[i];
-			if (var[i] == '\0') break;
-		}
-	}
-};
-class Animal
+#define mx 30
+class Book
 {
 protected:
-	char name[mx] = "";
+	char title[mx] = "";
+	char writer[mx] = "";
 public:
-	Animal(const char* name)
+	Book(const char* title, const char* writer)
 	{
-		Text::SetText(this->name, name);
+		strcpy_s(this->title, title);
+		strcpy_s(this->writer, writer);
 	}
-	virtual void Speak() = 0;
+	virtual void Display()
+	{
+		printf("제목 : %s\n", title);
+		printf("저자 : %s\n", writer);
+	}
 };
 
-class Dog : public Animal
+class EBook : public Book
 {
+private:
+	double cap = 0.0;
 public:
-	Dog(const char* name);
-	void Speak() override
+	EBook(const char* title, const char* writer, double cap) : Book(title, writer), cap(cap) {}
+	void Display()
 	{
-		cout << "barks!" << endl;
+		Book::Display();
+		printf("파일 크기 : %.1lfmb\n\n", cap);
 	}
 };
 
-/// <summary>
-/// 부모의 생성자 오버라이딩
-/// </summary>
-/// <param name="name"></param>
-Dog::Dog(const char* name) : Animal(name) {}
-
-class Cat : public Animal
+class PaperBook : public Book
 {
+private:
+	int pages = 0;
 public:
-	Cat(const char* name);
-	void Speak() override
+	PaperBook(const char* title, const char* writer, int pages) : Book(title, writer), pages(pages) {}
+	void Display()
 	{
-		cout << "meows!" << endl;
+		Book::Display();
+		printf("페이지 수 : %d 페이지\n", pages);
 	}
 };
-
-Cat::Cat(const char* name) : Animal(name) {}
-
 int main()
 {
-	Dog d1("Baekgu"); Cat c1("Nabi");
-	Animal* animals[] = { &d1, &c1 };
+	EBook eb("Clean Code", "Robert Martin", 5.2);
+	PaperBook pb("Refactoring", "Martin Fowler", 450);
+	Book* books[] = { &eb, &pb };
 	for (int i = 0; i < 2; i++)
-	{
-		animals[i]->Speak();
-	}
+		books[i]->Display();
 	return 0;
 }
