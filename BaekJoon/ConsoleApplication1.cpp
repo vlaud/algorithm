@@ -2,59 +2,79 @@
 
 using namespace std;
 
-class Vehicle
+class Component
 {
 public:
-	virtual void StartEngine() = 0;
-	virtual void Drive() = 0;
-	virtual void StopEngine() = 0;
+	virtual void Display() = 0;
+	virtual ~Component() {}
 };
 
-class Car : public Vehicle
+class Transform : public Component
 {
+private:
+	string name;
 public:
-	void StartEngine()
+	Transform(string n) : name(n) {}
+
+	void Display() override
 	{
-		printf("자동차 엔진 시동!\n");
-	}
-	void Drive()
-	{
-		printf("부릉 부릉~!\n");
-	}
-	void StopEngine()
-	{
-		printf("자동차가 멈췄다\n\n");
-	}
-};
-class Motorcycle : public Vehicle
-{
-public:
-	void StartEngine()
-	{
-		printf("오토바이 엔진 시동!\n");
-	}
-	void Drive()
-	{
-		printf("부와앙~!\n");
-	}
-	void StopEngine()
-	{
-		// 원시 문자열 리터럴
-		cout << R"(!@#@!#!%#@&)" << endl;
-		printf("오토바이가 멈췄다\n\n");
+		cout << "Transform: " << name << endl;
 	}
 };
 
+class Renderer : public Component
+{
+private:
+	string name;
+public:
+	Renderer(string n) : name(n) {}
+
+	void Display() override
+	{
+		cout << "Renderer: " << name << endl;
+	}
+};
+
+class GameObject : public Component
+{
+private:
+	string name;
+	Component* components[10];
+	int childCount;
+public:
+	GameObject(string n) : name(n), childCount(0), components() {}
+
+	void Add(Component* c)
+	{
+		components[childCount++] = c;
+	}
+
+	void Display() override
+	{
+		cout << "Composite: " << name << endl;
+
+		// 모든 자식 Display()
+		for (int i = 0; i < childCount; ++i)
+		{
+			components[i]->Display();
+		}
+	}
+};
 
 int main()
 {
-	Car c; Motorcycle m;
-	Vehicle* vehicles[] = { &c, &m };
-	for (int i = 0; i < 2; i++)
-	{
-		vehicles[i]->StartEngine();
-		vehicles[i]->Drive();
-		vehicles[i]->StopEngine();
-	}
+	Transform file1("file1.txt");
+	Transform file2("file2.txt");
+
+	GameObject folder1("forder1");
+	folder1.Add(&file1);
+	folder1.Add(&file2);
+
+	Transform file3("file3.txt");
+	GameObject rootFolder("Root");
+	rootFolder.Add(&folder1);
+	rootFolder.Add(&file3);
+
+	rootFolder.Display();
 	return 0;
 }
