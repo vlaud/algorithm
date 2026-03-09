@@ -1,80 +1,68 @@
 ﻿#include <iostream>
+#include <vector>
+#include <tuple>
+#include <queue>
 
 using namespace std;
+#define SIZE 7
 
-class Component
+using diPair = pair<double, int>;
+using diPair2D = vector<vector<diPair>>;
+using distAndCoord = tuple<double, int, int>;
+
+
+void ConnectNode(vector<distAndCoord>& roads, diPair2D& graph)
 {
-public:
-	virtual void Display() = 0;
-	virtual ~Component() {}
-};
-
-class Transform : public Component
-{
-private:
-	string name;
-public:
-	Transform(string n) : name(n) {}
-
-	void Display() override
+	for (auto [dist, u, v] : roads)
 	{
-		cout << "Transform: " << name << endl;
+		graph[u].emplace_back(dist, v);
+		graph[v].emplace_back(dist, u);
 	}
-};
-
-class Renderer : public Component
-{
-private:
-	string name;
-public:
-	Renderer(string n) : name(n) {}
-
-	void Display() override
-	{
-		cout << "Renderer: " << name << endl;
-	}
-};
-
-class GameObject : public Component
-{
-private:
-	string name;
-	Component* components[10];
-	int childCount;
-public:
-	GameObject(string n) : name(n), childCount(0), components() {}
-
-	void Add(Component* c)
-	{
-		components[childCount++] = c;
-	}
-
-	void Display() override
-	{
-		cout << "Composite: " << name << endl;
-
-		// 모든 자식 Display()
-		for (int i = 0; i < childCount; ++i)
-		{
-			components[i]->Display();
-		}
-	}
-};
-
+}
 int main()
 {
-	Transform file1("file1.txt");
-	Transform file2("file2.txt");
+	vector<distAndCoord> roads = // 거리, u, v
+	{
+		{6.0, 0, 1},
+		{4.0, 0, 2},
+		{5.0, 1, 2},
+		{7.0, 1, 3},
+		{6.0, 1, 4},
+		{3.0, 2, 3},
+		{8.0, 2, 4},
+		{3.0, 3, 5},
+		{3.0, 4, 6},
+		{2.0, 5, 6},
+	};
 
-	GameObject folder1("forder1");
-	folder1.Add(&file1);
-	folder1.Add(&file2);
+	diPair2D graph(SIZE);
 
-	Transform file3("file3.txt");
-	GameObject rootFolder("Root");
-	rootFolder.Add(&folder1);
-	rootFolder.Add(&file3);
+	ConnectNode(roads, graph);
 
-	rootFolder.Display();
+	priority_queue<diPair, vector<diPair>, greater<diPair>> q;
+	bool visited[SIZE] = {};
+	q.emplace(0, 0);
+
+	double cost = 0;
+	while (!visited[6] && !q.empty())
+	{
+		auto [dist, u] = q.top();
+
+		q.pop();
+
+		if (visited[u]) continue;
+
+		visited[u] = true;
+		cost += dist;
+		printf("현재 노드: %c\n", u + 'a');
+		printf("누적 거리: %lf\n\n", cost);
+		for (auto [d, node] : graph[u])
+		{
+			if (visited[node]) continue;
+			q.emplace(d, node);
+		}
+	}
+
+	cout << cost;
 	return 0;
 }
