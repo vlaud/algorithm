@@ -21,7 +21,7 @@ namespace Dong
 		class iterator
 		{
 		public:
-			iterator() : node(nullptr), head(nullptr), idx(-1) {}
+			iterator() : node(nullptr), head(nullptr), idx(0) {}
 			iterator(Node* iter, Node* head, int idx) : node(iter), head(head), idx(idx) {}
 
 			~iterator()
@@ -92,7 +92,7 @@ namespace Dong
 
 		list() : head(new Node())
 		{
-			iterator it(head, head, -1);
+			iterator it(head, head, 0);
 			b = e = it;
 		}
 
