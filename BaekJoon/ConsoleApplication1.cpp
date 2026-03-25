@@ -52,6 +52,11 @@ namespace Dong
 				idx--;
 			}
 
+			void reset()
+			{
+				node = head->next;
+			}
+
 			void operator++() // ++iter
 			{
 				baseUp();
@@ -108,15 +113,13 @@ namespace Dong
 
 		void insert(Node* prev, Node* node)
 		{
-			bool v = empty(); // b의 위치를 옮기기 전 빈 상태 체크
-
 			node->prev = prev;
 			node->next = prev->next;
 
 			if (node->next) node->next->prev = node;
 			prev->next = node;
 
-			if (v) b++; // 삽입 전 빈 상태였다면 -> b의 위치를 첫 원소로 옮김
+			b.reset();
 		}
 
 		void push_front(T val)
@@ -137,24 +140,21 @@ namespace Dong
 			node->next->prev = node->prev;
 			delete node;
 
-			if (empty()) b = e; // 노드 삭제 후 비게 된다면 -> b의 위치를 e와 같게 함
+			b.reset();
 		}
 
 		void pop_front()
 		{
 			if (empty()) return;
 
-			Node* del = head;
-			head = head->next;
-			remove(del);
+			remove(head->next);
 		}
 
 		void pop_back()
 		{
 			if (empty()) return;
 
-			Node* del = head->prev;
-			remove(del);
+			remove(head->prev);
 		}
 
 		iterator erase(iterator& iter)
@@ -215,34 +215,17 @@ int main()
 {
 	Dong::list<char> li;
 
-	char text[mx];
-	cin >> text;
-
-	for (int i = 0; i < strlen(text); i++)
+	for (char c = 'a'; c <= 'z'; c++)
 	{
-		char c = text[i];
-		li.push_back(c);
-	}
-	int n;
-	cin >> n;
-
-	auto iter = li.begin();
-
-	while (n--)
-	{
-		if (iter != li.end()) iter++;
+		li.push_front(c);
 	}
 
-	for (int i = 0; i < 4; i++)
-	{
-		char c;
-		cin >> c;
-		CMD(c, li, iter);
-	}
+	li.pop_front();
 
-	// li.printAll();
+	cout << *li.begin();
 
-	cout << (li.empty() ? 0 : iter.index());
-
+	while (!li.empty()) li.pop_front();
+	li.push_back('a');
+	cout << *li.begin();
 	return 0;
 }
