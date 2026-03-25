@@ -1,55 +1,248 @@
 ﻿#include <iostream>
-#include <print>
 
+using namespace std;
 
-/* 변수 템플릿 */
-template<typename T>
-constexpr T pi = T(3.1415926535897932385L);
+#define mx 30
 
-/* 명시적 특수화 */
-template<typename T>
-void Swap(T& a, T& b)
+namespace Dong
 {
-	T temp = a;
-	a = b;
-	b = temp;
+	template<typename T>
+	class list // 이중 원형 리스트
+	{
+	public:
+		struct Node
+		{
+			T val;
+			Node* next, * prev;
+			Node() : val(0), next(this), prev(this) {}
+			Node(T val) :val(val), next(this), prev(this) {}
+		};
+
+		class iterator
+		{
+		public:
+			iterator() : node(nullptr), head(nullptr), idx(-1) {}
+			iterator(Node* iter, Node* head, int idx) : node(iter), head(head), idx(idx) {}
+
+			~iterator()
+			{
+				node = nullptr;
+			}
+
+			bool operator==(const iterator& other) const
+			{
+				return node == other.node;
+			}
+
+			/// <summary>
+			/// 기본 우측 이동
+			/// </summary>
+			void baseUp()
+			{
+				node = node->next;
+				idx++;
+			}
+
+			/// <summary>
+			/// 기본 좌측 이동
+			/// </summary>
+			void baseDown()
+			{
+				node = node->prev;
+				idx--;
+			}
+
+			void operator++() // ++iter
+			{
+				baseUp();
+			}
+
+			void operator++(int) // iter++
+			{
+				baseUp();
+			}
+
+			void operator--()
+			{
+				baseDown();
+			}
+
+			void operator--(int)
+			{
+				baseDown();
+			}
+
+			T operator*() const
+			{
+				if (!node) return (T)0;
+				return node->val;
+			}
+
+			int index() const { return idx; }
+			Node* Ptr() const { return node; }
+		private:
+			Node* node, * head;
+			int idx;
+		};
+
+		list() : head(new Node())
+		{
+			iterator it(head, head, -1);
+			b = e = it;
+		}
+
+		~list()
+		{
+			while (head->next != head) pop_front();
+
+			head->next = nullptr;
+			head->prev = nullptr;
+			delete head;
+			head = nullptr;
+		}
+
+		bool empty()
+		{
+			return head->next == head;
+		}
+
+		void insert(Node* prev, Node* node)
+		{
+			bool v = empty(); // b의 위치를 옮기기 전 빈 상태 체크
+
+			node->prev = prev;
+			node->next = prev->next;
+
+			if (node->next) node->next->prev = node;
+			prev->next = node;
+
+			if (v) b++; // 삽입 전 빈 상태였다면 -> b의 위치를 첫 원소로 옮김
+		}
+
+		void push_front(T val)
+		{
+			insert(head, new Node(val));
+		}
+
+		void push_back(T val)
+		{
+			insert(head->prev, new Node(val));
+		}
+
+		void remove(Node* node)
+		{
+			if (empty() || node == head) return;
+
+			node->prev->next = node->next;
+			node->next->prev = node->prev;
+			delete node;
+
+			if (empty()) b = e; // 노드 삭제 후 비게 된다면 -> b의 위치를 e와 같게 함
+		}
+
+		void pop_front()
+		{
+			if (empty()) return;
+
+			Node* del = head;
+			head = head->next;
+			remove(del);
+		}
+
+		void pop_back()
+		{
+			if (empty()) return;
+
+			Node* del = head->prev;
+			remove(del);
+		}
+
+		iterator erase(iterator& iter)
+		{
+			if (iter.Ptr() == head) return iter;
+			iterator newIter(iter.Ptr()->next, head, iter.index());
+			remove(iter.Ptr());
+			return newIter;
+		}
+
+		iterator begin()
+		{
+			return b;
+		}
+
+		iterator end()
+		{
+			return e;
+		}
+
+		void printAll()
+		{
+			Node* cur = head->next;
+
+			while (cur != head)
+			{
+				cout << cur->val;
+				cur = cur->next;
+			}
+			cout << endl;
+		}
+	private:
+		Node* head;
+		iterator b, e;
+	};
 }
 
-template<>
-void Swap<double>(double& a, double& b)
+void CMD(char& c, Dong::list<char>& li, Dong::list<char>::iterator& iter)
 {
-	std::cout << "double은 스왑 x" << std::endl;
-}
-
-
-/* 가변 인자 템플릿 - 폴드 방식 C++17 */
-
-template<typename... Args>
-void print(Args... args)
-{
-	//(std::print("{} ", args), ...);
-	(std::cout << ... << args);
-	std::print("\n");
-}
-
-template<typename... Args>
-auto sum(Args... args)
-{
-	return (... + args);
+	if (c == 'L')
+	{
+		if (iter == li.begin()) return;
+		iter--;
+	}
+	else if (c == 'R')
+	{
+		if (iter == li.end()) return;
+		iter++;
+	}
+	else
+	{
+		// 커서 앞 부분을 지움
+		iter = li.erase(iter);
+	}
 }
 
 int main()
 {
-	int x = 10, y = 20;
-	Swap(x, y);
+	Dong::list<char> li;
 
-	double a = 1.5, b = 2.5;
+	char text[mx];
+	cin >> text;
 
-	Swap(a, b);
+	for (int i = 0; i < strlen(text); i++)
+	{
+		char c = text[i];
+		li.push_back(c);
+	}
+	int n;
+	cin >> n;
 
-	print(1, 2, 'A', "dfewge");
+	auto iter = li.begin();
 
-	std::cout << sum(1, 2, 3, 4, 5);
+	while (n--)
+	{
+		if (iter != li.end()) iter++;
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		char c;
+		cin >> c;
+		CMD(c, li, iter);
+	}
+
+	// li.printAll();
+
+	cout << (li.empty() ? 0 : iter.index());
 
 	return 0;
 }
