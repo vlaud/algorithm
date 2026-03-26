@@ -1,231 +1,242 @@
 ﻿#include <iostream>
 
-using namespace std;
-
-#define mx 30
-
-namespace Dong
+enum class eColor
 {
-	template<typename T>
-	class list // 이중 원형 리스트
-	{
-	public:
-		struct Node
-		{
-			T val;
-			Node* next, * prev;
-			Node() : val(0), next(this), prev(this) {}
-			Node(T val) :val(val), next(this), prev(this) {}
-		};
+	Red,
+	Black,
+	End,
+};
 
-		class iterator
-		{
-		public:
-			iterator() : node(nullptr), head(nullptr), idx(0) {}
-			iterator(Node* iter, Node* head, int idx) : node(iter), head(head), idx(idx) {}
-
-			~iterator()
-			{
-				node = nullptr;
-			}
-
-			bool operator==(const iterator& other) const
-			{
-				return node == other.node;
-			}
-
-			/// <summary>
-			/// 기본 우측 이동
-			/// </summary>
-			void baseUp()
-			{
-				node = node->next;
-				idx++;
-			}
-
-			/// <summary>
-			/// 기본 좌측 이동
-			/// </summary>
-			void baseDown()
-			{
-				node = node->prev;
-				idx--;
-			}
-
-			void reset()
-			{
-				node = head->next;
-			}
-
-			void operator++() // ++iter
-			{
-				baseUp();
-			}
-
-			void operator++(int) // iter++
-			{
-				baseUp();
-			}
-
-			void operator--()
-			{
-				baseDown();
-			}
-
-			void operator--(int)
-			{
-				baseDown();
-			}
-
-			T operator*() const
-			{
-				if (!node) return (T)0;
-				return node->val;
-			}
-
-			int index() const { return idx; }
-			Node* Ptr() const { return node; }
-		private:
-			Node* node, * head;
-			int idx;
-		};
-
-		list() : head(new Node())
-		{
-			iterator it(head, head, 0);
-			b = e = it;
-		}
-
-		~list()
-		{
-			while (head->next != head) pop_front();
-
-			head->next = nullptr;
-			head->prev = nullptr;
-			delete head;
-			head = nullptr;
-		}
-
-		bool empty()
-		{
-			return head->next == head;
-		}
-
-		void insert(Node* prev, Node* node)
-		{
-			node->prev = prev;
-			node->next = prev->next;
-
-			if (node->next) node->next->prev = node;
-			prev->next = node;
-
-			b.reset();
-		}
-
-		void push_front(T val)
-		{
-			insert(head, new Node(val));
-		}
-
-		void push_back(T val)
-		{
-			insert(head->prev, new Node(val));
-		}
-
-		void remove(Node* node)
-		{
-			if (empty() || node == head) return;
-
-			node->prev->next = node->next;
-			node->next->prev = node->prev;
-			delete node;
-
-			b.reset();
-		}
-
-		void pop_front()
-		{
-			if (empty()) return;
-
-			remove(head->next);
-		}
-
-		void pop_back()
-		{
-			if (empty()) return;
-
-			remove(head->prev);
-		}
-
-		iterator erase(iterator& iter)
-		{
-			if (iter.Ptr() == head) return iter;
-			iterator newIter(iter.Ptr()->next, head, iter.index());
-			remove(iter.Ptr());
-			return newIter;
-		}
-
-		iterator begin()
-		{
-			return b;
-		}
-
-		iterator end()
-		{
-			return e;
-		}
-
-		void printAll()
-		{
-			Node* cur = head->next;
-
-			while (cur != head)
-			{
-				cout << cur->val;
-				cur = cur->next;
-			}
-			cout << endl;
-		}
-	private:
-		Node* head;
-		iterator b, e;
-	};
-}
-
-void CMD(char& c, Dong::list<char>& li, Dong::list<char>::iterator& iter)
+struct Node
 {
-	if (c == 'L')
-	{
-		if (iter == li.begin()) return;
-		iter--;
-	}
-	else if (c == 'R')
-	{
-		if (iter == li.end()) return;
-		iter++;
-	}
-	else
-	{
-		// 커서 앞 부분을 지움
-		iter = li.erase(iter);
-	}
-}
+	int data;
+	eColor Color;
 
-int main()
+	Node* left;
+	Node* right;
+	Node* parent;
+
+	Node(int data)
+		: data(data)
+		, Color(eColor::Red)
+		, left(nullptr)
+		, right(nullptr)
+		, parent(nullptr)
+	{}
+};
+
+class RedBlackTree
 {
-	Dong::list<char> li;
-
-	for (char c = 'a'; c <= 'z'; c++)
+public:
+	RedBlackTree()
 	{
-		li.push_front(c);
+		NIL = new Node(0);
+		NIL->Color = eColor::Black;
+		mRoot = NIL;
 	}
 
-	li.pop_front();
+	void LeftRotate(Node* x)
+	{
+		Node* y = x->right;
 
-	cout << *li.begin();
+		// 1단계: y의 왼쪽 서브트리 -> x의 오른쪽 이동
+		x->right = y->left;
+		if (y->left != NIL) // 자식이 빈 노드가 아니면 부모를 x로 변환
+		{
+			y->left->parent = x;
+		}
 
-	while (!li.empty()) li.pop_front();
-	li.push_back('a');
-	cout << *li.begin();
-	return 0;
-}
+		// 2단계: y의 부모를 x의 부모로 설정
+		y->parent = x->parent;
+		if (x->parent == NIL)
+		{
+			mRoot = y;
+		}
+		else if (x == x->parent->left)
+		{
+			x->parent->left = y;
+		}
+		else
+		{
+			x->parent->right = y;
+		}
+
+		// 3단계: x를 y의 왼쪽 자식으로 설정
+		y->left = x;
+		x->parent = y;
+	}
+
+	void RightRotate(Node* y)
+	{
+		Node* x = y->left;
+
+		y->left = x->right;
+		if (x->right != NIL)
+		{
+			x->right->parent = y;
+		}
+
+		x->parent = y->parent;
+		if (y->parent == NIL)
+		{
+			mRoot = x;
+		}
+		else if (y == y->parent->left)
+		{
+			y->parent->left = x;
+		}
+		else
+		{
+			y->parent->right = x;
+		}
+
+		x->right = y;
+		y->parent = x;
+	}
+
+	void insert(int data)
+	{
+		Node* newNode = new Node(data);
+		newNode->left = NIL;
+		newNode->right = NIL;
+
+		Node* y = NIL;
+		Node* x = mRoot;
+
+		// 새로운 노드 삽입 위치 찾기
+		// 재귀로 대체 가능
+
+		while (x != NIL)
+		{
+			y = x;
+			if (newNode->data < x->data)
+			{
+				x = x->left;
+			}
+			else
+			{
+				x = x->right;
+			}
+		}
+
+		newNode->parent = y;
+
+		if (y == NIL)
+		{
+			mRoot = newNode;
+		}
+		else if (newNode->data < y->data)
+		{
+			y->left = newNode;
+		}
+		else
+		{
+			y->right = newNode;
+		}
+		newNode->Color = eColor::Red;
+		InsertFixup(newNode);
+	}
+
+	void fixInsert(Node* z)
+	{
+		while (z->parent->Color == eColor::Red)
+		{
+			Node* g = z->parent->parent;
+			Node* u = z->parent == g->right ? g->left : g->right;
+
+			// recoloring
+			if (u->Color == eColor::Red)
+			{
+				z->parent->Color = eColor::Black;
+				u->Color = eColor::Black;
+				g->Color = eColor::Red;
+				z = g;
+				continue;
+			}
+
+			// restructuring
+			if (z->parent == g->left)
+			{
+				// 부모, 삼촌 가운데 껴있음
+				if (z == z->parent->right)
+				{
+					z = z->parent;
+					LeftRotate(z);
+				}
+				z->parent->Color = eColor::Black;
+				g->Color = eColor::Red;
+				RightRotate(g);
+			}
+			else
+			{
+				if (z == z->parent->left)
+				{
+					z = z->parent;
+					RightRotate(z);
+				}
+				z->parent->Color = eColor::Black;
+				g->Color = eColor::Red;
+				LeftRotate(g);
+			}
+		}
+		mRoot->Color = eColor::Black;
+	}
+
+	void InsertFixup(Node* z)
+	{
+		while (z->parent->Color == eColor::Red)
+		{
+			Node* grand = z->parent->parent;
+			if (z->parent == grand->left)
+			{
+				Node* uncle = grand->right; // 삼촌 노드
+				if (uncle->Color == eColor::Red) // 삼촌 빨간색
+				{
+					z->parent->Color = eColor::Black; // recoloring
+					uncle->Color = eColor::Black;
+					grand->Color = eColor::Red;
+					z = grand;
+				}
+				else // 삼촌 검은색
+				{
+					// restructuring
+					if (z == z->parent->right) // 삼촌 검은색, z 오른쪽 자식
+					{
+						z = z->parent;
+						LeftRotate(z);
+					}
+					// 삼촌 검은색, z 왼쪽 자식
+					z->parent->Color = eColor::Black;
+					grand->Color = eColor::Red;
+					RightRotate(grand);
+				}
+			}
+			else
+			{
+				Node* uncle = grand->left;
+				if (uncle->Color == eColor::Red)
+				{
+					z->parent->Color = eColor::Black;
+					uncle->Color = eColor::Black;
+					grand->Color = eColor::Red;
+					z = grand;
+				}
+				else
+				{
+					if (z == z->parent->left)
+					{
+						z = z->parent;
+						RightRotate(z);
+					}
+					z->parent->Color = eColor::Black;
+					grand->Color = eColor::Red;
+					LeftRotate(grand);
+				}
+			}
+		}
+		mRoot->Color = eColor::Black;
+	}
+private:
+	Node* mRoot;
+	Node* NIL;
+};
