@@ -1,37 +1,42 @@
 ﻿#include <iostream>
-#include <vector>
 
 using namespace std;
 
-/* lower_bound: 타겟과 같거나 큰 첫번째 원소 */
-/* upper_bound: 타겟보다 큰 첫번째 원소 */
+int arr[6] = { 1,5,4,2,-5,-7 };
 
-int bound(vector<int>& arr, int target, bool lower = true)
+int partition(int l, int r)
 {
-	int l = 0, r = arr.size() - 1;
+	int p = arr[r];
 
-	while (l < r)
+	for (int i = l; i < r; i++)
 	{
-		int m = l + (r - l) / 2;
-
-		bool v = lower ? arr[m] < target : arr[m] <= target;
-
-		if (v) l = m + 1;
-		else r = m;
+		if (p >= arr[i])
+		{
+			swap(arr[l++], arr[i]);
+		}
 	}
+	swap(arr[l], arr[r]);
 
-	return r;
+	return l;
 }
 
+int kSelect(int l, int r, int k)
+{
+	while (l <= r)
+	{
+		int m = partition(l, r);
+		if (k == m) return m;
+		else if (m < k) l = m + 1;
+		else r = m - 1;
+	}
+	return -1;
+}
 int main()
 {
-	vector<int> arr = { 1,2,3,3,3,3,4,5 };
-	// lower_bound
-	int idx = bound(arr, 3);
-	printf("lower_bound: arr[%d] = %d\n", idx, arr[idx]);
-
-	// upper_bound
-	idx = bound(arr, 3, false);
-	printf("upper_bound: arr[%d] = %d\n", idx, arr[idx]);
+	int n;
+	cin >> n;
+	n = 6 - n;
+	int idx = kSelect(0, 5, n);
+	cout << arr[idx];
 	return 0;
 }
