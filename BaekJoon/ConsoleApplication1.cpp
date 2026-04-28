@@ -1,56 +1,96 @@
 ﻿#include <iostream>
 #include <vector>
+
 using namespace std;
 
-class edge
+vector<int> bad_char(string& pattern)
 {
-public:
-	int weight, from, to;
-	edge(int weight, int from, int to) : weight(weight), from(from), to(to) {}
+	int n = pattern.size();
 
-	bool operator< (const edge& other) const
+	vector<int> bd(256, n);
+
+	for (int i = 0; i < n; i++)
 	{
-		weight < other.weight;
+		bd[pattern[i]] = i;
 	}
-};
+	return bd;
+}
 
-void bellman(vector<edge>& edges,int s, int maxNode)
+vector<int> make_good(string& pattern)
 {
-	int n = edges.size();
-	vector<int> dist(maxNode+1, INT_MAX);
-	dist[s] = 0;
+	int n = pattern.size();
 
-	for (int i = 1; i < n; i++)
+	int p = n;
+	int sp = p + 1;
+
+	// 접미사 동일 문자열 체크 테이블
+	vector<int> suffix(n + 1, 0);
+	suffix[n] = sp;
+	// 스킵 테이블
+	vector<int> skip(n + 1, 0);
+
+	// 역 preKMP
+	while (p > 0)
 	{
-		for (auto& e : edges)
+		while (sp <= n && pattern[p - 1] != pattern[sp - 1])
 		{
-			int from = e.from;
-			int weight = e.weight;
-			int to = e.to;
-
-			if (dist[from] != INT_MAX && dist[to] > dist[from] + weight)
-			{
-				dist[to] = dist[from] + weight;
-			}
+			if (skip[sp] == 0) 
+				skip[sp] = sp - p;
+			sp = suffix[sp];
 		}
+		suffix[--p] = --sp;
 	}
 
-	for (auto& e : edges)
+	sp = suffix[0];
+
+	while (p < n)
 	{
-		if (dist[e.from] != INT_MAX && dist[e.to] > dist[e.from] + e.weight)
+		if (skip[p] == 0)
+			skip[p] = sp;
+		if (p++ == sp)
+			sp = suffix[sp];
+	}
+
+	return skip;
+}
+
+void search(vector<int>& bad, vector<int>& good, string& s, string& pattern)
+{
+	int n = s.size(), m = pattern.size();
+
+	int b = 0;
+
+	if (n < m) return;
+
+	while (b <= n - m)
+	{
+		int match = m;
+
+		while (match != 0 && pattern[match - 1] == s[b + match - 1]) --match;
+
+		if (!match)
 		{
-			cout << "음수 사이클 존재" << endl;
+			cout << b << " ";
 		}
+
+		char c = s[b + match];
+		int shift = bad[c];
+		int goodshift = good[match];
+		if (shift != m)
+		{
+			b += max(match - shift, good[match]);
+		}
+		else b += max(match, good[match]);
 	}
 }
 int main()
 {
-	vector<edge> edges;
+	string h = "abztyaababbababttbcabbabatdwcaabbabczzba";
+	string pattern = "abbab";
+	const int p_size = pattern.size();
 
-	edges.emplace_back(edge(4, 1, 2));
-	edges.emplace_back(edge(2, 1, 3));
-	edges.emplace_back(edge(-3, 2, 3));
-	edges.emplace_back(edge(1, 3, 4));
-	bellman(edges, 1, 4);
+	vector<int> bad = bad_char(pattern);
+	vector<int> good = make_good(pattern);
+	search(bad, good, h, pattern);
 	return 0;
 }
