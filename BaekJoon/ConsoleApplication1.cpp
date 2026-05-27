@@ -1,11 +1,8 @@
 ﻿#include <iostream>
 #include <string>
-#include <vector>
 #include <list>
 
 using namespace std;
-
-#define PRIME 7919
 
 int res = 7;
 
@@ -15,168 +12,77 @@ int ymax = INT_MAX, xmax = INT_MAX;
 struct HASH
 {
 	string key;
-
-	HASH(string key) : key(key) {}
+	int depth;
+	HASH(string key, int level) : key(key), depth(level) {}
 };
 
-list<HASH*> hmap[PRIME];
-
-uint64_t gethash(string& s)
+class Unordered_Hash
 {
-	uint64_t hash = 5381;
-
-	for (char c : s)
+#define PRIME 7919
+public:
+	Unordered_Hash() : curH()
 	{
-		hash = (hash << 5) + hash + c;
+		hmap = new list<HASH*>[PRIME];
 	}
 
-	return hash;
-}
-
-bool exist(string& s, int& h)
-{
-	if (hmap[h].empty()) return false;
-
-	for (auto it = hmap[h].begin(); it != hmap[h].end(); it++)
+	~Unordered_Hash()
 	{
-		if ((*it)->key == s) return true;
-	}
-	return false;
-}
-
-void insert(string& s, int& h)
-{
-	hmap[h].emplace_back(new HASH(s));
-}
-
-string vecToString(vector<string>& mat)
-{
-	string s;
-	for (string c : mat)
-	{
-		s += c;
-	}
-	return s;
-}
-
-vector<int> maketable(string& pat)
-{
-	int n = pat.size();
-	vector<int> table(n, 0);
-
-	int len = 0;
-
-	for (int i = 1; i < n; i++)
-	{
-		while (len != 0 && pat[len] != pat[i]) len = table[len - 1];
-
-		if (pat[len] == pat[i])
+		for (int i = 0; i < PRIME; i++)
 		{
-			table[i] = ++len;
-		}
-	}
-	return table;
-}
-
-bool search(string& s, string& pat, vector<int>& table)
-{
-	int n = s.size();
-	int m = pat.size();
-	int len = 0;
-
-	for (int i = 0; i < n; i++)
-	{
-		while (len != 0 && pat[len] != s[i]) len = table[len - 1];
-
-		if (pat[len] == s[i])
-		{
-			if (len == m - 1) return true;
-			else len++;
-		}
-	}
-
-	return false;
-}
-
-void spin(vector<string>& mat, int r, int c, bool right = true)
-{
-	int n = mat.size(), m = mat[0].size();
-
-	if (right)
-	{
-		for (int i = -1; i < 1; i++)
-		{
-			for (int j = i + 1; j < 2; j++)
+			for (HASH* p : hmap[i])
 			{
-				swap(mat[r + i][c + j], mat[r + j][c + i]);
+				delete p;
 			}
+			hmap[i].clear();
 		}
 	}
-	else
+
+	uint64_t gethash(string& s)
 	{
-		for (int i = -1; i < 1; i++)
+		uint64_t hash = 5381;
+
+		for (char c : s)
 		{
-			for (int j = -1; j < -i; j++)
-			{
-				swap(mat[r + i][c + j], mat[r - j][c - i]);
-			}
+			hash = (hash << 5) + hash + c;
 		}
+
+		return hash;
 	}
 
-	for (int i = r - 1; i <= r + 1; i++)
+	HASH* find(string& s)
 	{
-		swap(mat[i][c - 1], mat[i][c + 1]);
-	}
-}
+		if (hmap[curH].empty()) return nullptr;
 
-void findcomb(vector<string>& mat, string& pat, vector<int>& table, int level, int cnt)
-{
-	for (int i = 0; i < mat.size(); i++)
-	{
-		if (search(mat[i], pat, table))
+		for (auto it = hmap[curH].begin(); it != hmap[curH].end(); it++)
 		{
-			res = min(cnt, res);
-			return;
+			if ((*it)->key == s) return *it;
 		}
+		return nullptr;
 	}
 
-	string s = vecToString(mat);
-
-	int h = gethash(s) % PRIME;
-	if (level == 6 || exist(s, h)) return;
-
-	insert(s,h);
-	
-	for (int i = ymin; i <= ymax; i++)
+	void insert(string& s, int depth)
 	{
-		for (int j = xmin; j <= xmax; j++)
-		{
-			spin(mat, i, j);
-			findcomb(mat, pat, table, level + 1, cnt + 1);
-			spin(mat, i, j, false);
-		}
+		hmap[curH].emplace_back(new HASH(s, depth));
 	}
-}
+
+	void setHash(string& s)
+	{
+		curH = gethash(s) % PRIME;
+	}
+private:
+	list<HASH*> *hmap;
+	int curH;
+};
 
 int main()
 {
-	vector<string> mat;
+	string s = "dfewfwgwgweg";
+	Unordered_Hash hs;
+	hs.setHash(s);
+	if (!hs.find(s)) cout << "없음" << endl;
+	hs.insert(s, s.length());
+	auto p = hs.find(s);
 
-	string s;
-	while (true)
-	{
-		getline(cin, s);
-		if (s.empty()) break;
-		mat.emplace_back(s);
-	}
-	string pat = "AAA";
-	vector<int> table = maketable(pat);
-
-	ymax = mat.size() - 2;
-	xmax = mat[0].size() - 2;
-
-	findcomb(mat, pat, table, 0, 0);
-
-	cout << (res == 7 ? "불가능" : "가능") << endl;
+	cout << p->key << " " << p->depth << endl;
 	return 0;
 }
