@@ -1,202 +1,142 @@
 ﻿#include <iostream>
+#include <vector>
+
 using namespace std;
 
-class BitMaskFilter
+struct AVLNode
 {
-public:
-	// 생성자
-	BitMaskFilter(int* inputData, int dataSize) : mData(inputData), mSize(dataSize)
-	{
-		mMask = 0xffffffff;
-		if (mSize < 32)
-		{
-			mMask = (1u << mSize) - 1;
-		}
-	}
-	~BitMaskFilter() {}
+	int data, height;
+	AVLNode* left, * right;
 
-	void SetBit(int index, bool value)
-	{
-		if (index >= 0 && index < mSize && index < 32)
-		{
-			if (value) mMask |= (1u << index);
-			else mMask &= ~(1u << index);
-				
-		}
-	}
-
-	bool GetBit(int index)
-	{
-		if (index >= 0 && index < mSize && index < 32)
-		{
-			return (mMask & (1u << index)) != 0;
-		}
-		return false;
-	}
-
-	void SetMask(unsigned int newMask)
-	{
-		mMask = newMask;
-	}
-
-	int ApplyFilter(int* result)
-	{
-		int resultIndex = 0;
-		for (int i = 0; i < mSize && i < 32; i++)
-		{
-			if (mMask & (1u << i)) // i번째 비트 1인지 확인
-			{
-				result[resultIndex++] = mData[i];
-
-			}
-		}
-		return resultIndex;
-	}
-
-	void PrintMask()
-	{
-		cout << "Mask (binary): ";
-		for (int i = mSize - 1; i >= 0; i--)
-		{
-			cout << ((mMask & (1u << i)) ? '1' : '0');
-		}
-		cout << " (0x";
-		cout.flags(ios::hex);
-		cout << mMask;
-		cout.flags(ios::dec);
-		cout << ")" << endl;
-	}
-
-	void SetAllBits()
-	{
-		mMask = (mSize < 32) ? (1u << mSize) - 1 : 0xffffffff;
-	}
-
-	void ClearAllBits()
-	{
-		mMask = 0;
-	}
-
-	void InvertMask()
-	{
-		mMask = ~mMask;
-		if (mSize < 32)
-		{
-			mMask &= (1u << mSize) - 1;
-		}
-	}
-
-	void IntersectWith(unsigned int otherMask)
-	{
-		mMask &= otherMask;
-	}
-
-	void UnionWith(unsigned int otherMask)
-	{
-		mMask |= otherMask;
-	}
-
-	int CountSetBits()
-	{
-		int count = 0;
-		unsigned int temp = mMask;
-		while (temp)
-		{
-			count += temp & 1;
-			temp >>= 1;
-		}
-		return count;
-	}
-private:
-	int *mData, mSize;
-	unsigned int mMask;
+	AVLNode(int value) : data(value), height(1), left(nullptr), right(nullptr) {}
 };
 
-void printfiltering(BitMaskFilter filter, int *result)
+class AVLTree
 {
-	filter.PrintMask();
-	int count = filter.ApplyFilter(result);
-	cout << "필터된 데이터: ";
-	for (int i = 0; i < count; i++)
+public:
+	AVLTree() {}
+	~AVLTree() { destroy(root); }
+
+	void insert(int value)
 	{
-		cout << result[i] << " ";
+		root = insert(root, value);
 	}
-	cout << endl << endl;
-}
+
+	void inorderSort(vector<int>& result)
+	{
+		inorder(root, result);
+	}
+
+private:
+	int getHeight(AVLNode* node)
+	{
+		return node ? node->height : 0;
+	}
+
+	int getBalanceFactor(AVLNode* node)
+	{
+		return node ? getHeight(node->left) - getHeight(node->right) : 0;
+	}
+
+	void updateHeight(AVLNode* node)
+	{
+		if (node)
+		{
+			node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+		}
+	}
+
+	AVLNode* rotateRight(AVLNode* y)
+	{
+		AVLNode* x = y->left;
+		y->left = x->right;
+		x->right = y;
+		updateHeight(y);
+		updateHeight(x);
+		return x;
+	}
+
+	AVLNode* rotateLeft(AVLNode* x)
+	{
+		AVLNode* y = x->right;
+		x->right = y->left;
+		y->left = x;
+		updateHeight(x);
+		updateHeight(y);
+		return y;
+	}
+
+	AVLNode* insert(AVLNode* node, int value)
+	{
+		if (!node) return new AVLNode(value);
+
+		if (value < node->data)
+			node->left = insert(node->left, value);
+		else
+			node->right = insert(node->right, value);
+
+		updateHeight(node);
+
+ 		int balance = getBalanceFactor(node);
+
+		if (balance > 1 && value <= node->left->data)
+		{
+			return rotateRight(node);
+		}
+		if (balance < -1 && value >= node->right->data)
+		{
+			return rotateLeft(node);
+		}
+
+		if (balance > 1 && value > node->left->data)
+		{
+			node->left = rotateLeft(node->left);
+			return rotateRight(node);
+		}
+
+		if (balance < -1 && value < node->right->data)
+		{
+			node->right = rotateRight(node->right);
+			return rotateLeft(node);
+		}
+
+		return node;
+	}
+
+	void inorder(AVLNode* node, vector<int>& result)
+	{
+		if (node)
+		{
+			inorder(node->left, result);
+			result.push_back(node->data);
+			inorder(node->right, result);
+		}
+	}
+
+	void destroy(AVLNode* node)
+	{
+		if (node)
+		{
+			destroy(node->left);
+			destroy(node->right);
+			delete node;
+		}
+	}
+
+private:
+	AVLNode* root = nullptr;
+};
 
 int main()
 {
-	int data[] = { 10,20,30,40,50,60,70,80 };
-	int dataSize = 8;
-	int result[8];
+	AVLTree tree;
+	vector<int> values = { 10,20,30,40,50,25 };
+	for (int value : values) tree.insert(value);
 
-	BitMaskFilter filter(data, dataSize);
+	vector<int> sortedValues;
+	tree.inorderSort(sortedValues);
+	for (int value : sortedValues)
+		cout << value << " ";
 
-	cout << "=== 비트 마스킹 데이터 필터링 예제 ===" << endl << endl;
-
-	// 초기 상태 (모든 데이터 포함)
-	cout << "1. 초기 상태 (모든 데이터 포함):" << endl;
-	filter.PrintMask();
-	int count = filter.ApplyFilter(result);
-	cout << "필터된 데이터: ";
-	for (int i = 0; i < count; i++)
-	{
-		cout << result[i] << " ";
-	}
-	cout << endl << endl;
-
-	cout << "2. 짝수 인덱스만 선택 (0, 2, 4, 6):" << endl;
-	filter.ClearAllBits();
-	filter.SetBit(0, true);
-	filter.SetBit(2, true);
-	filter.SetBit(4, true);
-	filter.SetBit(6, true);
-	filter.PrintMask();
-	count = filter.ApplyFilter(result);
-	cout << "필터된 데이터: ";
-	for (int i = 0; i < count; i++)
-	{
-		cout << result[i] << " ";
-	}
-	cout << endl << endl;
-
-	cout << "3. 비트 연산으로 마스크 설정 (0b10110101):" << endl;
-	filter.SetMask(0b10110101); // 0, 2, 4, 5, 7번째
-	filter.PrintMask();
-	cout << "필터된 데이터: ";
-	count = filter.ApplyFilter(result);
-	for (int i = 0; i < count; i++)
-	{
-		cout << result[i] << " ";
-	}
-	cout << "설정된 비트 개수: " << filter.CountSetBits() << endl << endl;
-
-	cout << "4.마스크 반전:" << endl;
-	filter.InvertMask();
-	filter.PrintMask();
-	count = filter.ApplyFilter(result);
-	cout << "필터된 데이터: ";
-	for (int i = 0; i < count; i++)
-	{
-		cout << result[i] << " ";
-	}
-	cout << endl << endl;
-
-	cout << "5. 마스크 교집합 연산:" << endl;
-	filter.SetMask(0b11110000);
-	cout << "마스크 A: ";
-	filter.PrintMask();
-
-	unsigned int maskB = 0b10101010;
-	cout << "마스크 B: ";
-	for (int i = 7; i >= 0; i--)
-	{
-		cout << ((maskB & (1u << i)) ? '1' : '0');
-	}
-	cout << endl;
-
-	filter.IntersectWith(maskB);
-	cout << "교집합 결과: ";
-	printfiltering(filter, result);
 	return 0;
 }
